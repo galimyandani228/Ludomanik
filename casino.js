@@ -1,42 +1,37 @@
 // ===== TELEGRAM WEB APP ИНИЦИАЛИЗАЦИЯ =====
-const tg = window.Telegram.WebApp;
-
-// Инициализация Telegram WebApp
-tg.ready();
-tg.expand();
-tg.MainButton.hide();
-
-// Установка цветовой темы для Telegram
-tg.setHeaderColor('#050505');
-tg.setBackgroundColor('#050505');
+const tg = window.Telegram?.WebApp;
+if (!tg) {
+    console.error('❌ Telegram WebApp не найден!');
+} else {
+    tg.ready();
+    tg.expand();
+    tg.MainButton.hide();
+    tg.setHeaderColor('#050505');
+    tg.setBackgroundColor('#050505');
+}
 
 // ===== ПАРАЛЛАКС-ЭФФЕКТ ПРИ ДВИЖЕНИИ МЫШИ =====
 let mouseX = 0;
 let mouseY = 0;
 
-// Обработчик движения мыши (только для десктопа)
 if (window.innerWidth > 768) {
     document.addEventListener('mousemove', (e) => {
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
 
-        mouseX = (e.clientX - centerX) / centerX * 50; // Масштаб от -50 до 50
+        mouseX = (e.clientX - centerX) / centerX * 50;
         mouseY = (e.clientY - centerY) / centerY * 50;
 
-        // Обновление CSS-переменных для параллакса
         document.documentElement.style.setProperty('--mouse-x', mouseX);
         document.documentElement.style.setProperty('--mouse-y', mouseY);
     });
 }
 
-// Обработчик тач-событий для мобильных (гироскоп-эффект)
 if (window.DeviceOrientationEvent && window.innerWidth <= 768) {
     window.addEventListener('deviceorientation', (e) => {
-        // Наклон телефона для параллакса (beta: вперед-назад, gamma: лево-право)
-        mouseX = (e.gamma || 0) * 2; // Умножаем для большего эффекта
+        mouseX = (e.gamma || 0) * 2;
         mouseY = (e.beta || 0) * 2;
 
-        // Ограничиваем значения
         mouseX = Math.max(-50, Math.min(50, mouseX));
         mouseY = Math.max(-50, Math.min(50, mouseY));
 
@@ -48,7 +43,7 @@ if (window.DeviceOrientationEvent && window.innerWidth <= 768) {
 // ===== СОСТОЯНИЕ ПРИЛОЖЕНИЯ =====
 const state = {
     balance: 0,
-    userId: tg.initDataUnsafe?.user?.id || 0,
+    userId: tg?.initDataUnsafe?.user?.id || 0,
     currentGame: null,
     bet: 10,
     isBalanceLoaded: false
@@ -59,47 +54,57 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // ===== СИНХРОНИЗАЦИЯ С БОТОМ =====
 
-// Отправка действия боту
 function sendAction(action, data = {}) {
-    const payload = { action, userId: state.userId, ...data };
-    console.log('Отправка боту:', payload);
+    if (!tg) {
+        console.warn('⚠️ Telegram WebApp не инициализирован');
+        return;
+    }
+    const payload = { action, ...data };
+    console.log('📤 Отправка боту:', JSON.stringify(payload));
     tg.sendData(JSON.stringify(payload));
 }
 
-// Обновление баланса
 function updateBalance(newBalance) {
-    state.balance = newBalance;
-    const balanceEl = document.getElementById('balance-amount');
+    state.balance = Math.max(0, newBalance);
+    
+    const balanceEl = document.getElementById('balance');
     if (balanceEl) {
-        balanceEl.textContent = `${state.balance.toLocaleString('ru-RU')} ₽`;
+        balanceEl.textContent = state.balance.toLocaleString('ru-RU');
     }
+    
     localStorage.setItem('balance', state.balance);
+    
+    document.querySelectorAll('.current-bet-display').forEach(el => {
+        el.textContent = state.balance;
+    });
 
-    // Синхронизация с ботом
-    if (state.isBalanceLoaded) {
-        sendAction('update_balance', { balance: state.balance });
-    }
+    console.log('💰 Баланс обновлен:', state.balance);
 }
 
-// Запрос баланса у бота
 function requestBalance() {
+    console.log('📥 Запрос баланса...');
     sendAction('get_balance');
 }
 
 // Обработка входящих сообщений от бота
-tg.onEvent('message', (event) => {
-    try {
-        const data = JSON.parse(event.data);
-        console.log('Получено от бота:', data);
+if (tg) {
+    tg.onEvent('message', (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            console.log('📩 Получено от бота:', data);
 
-        if (data.action === 'balance_update' && data.balance !== undefined) {
-            state.isBalanceLoaded = true;
-            updateBalance(data.balance);
+            if (data.action === 'balance_updated' || data.action === 'update_balance') {
+                if (data.balance !== undefined) {
+                    state.isBalanceLoaded = true;
+                    updateBalance(data.balance);
+                    console.log('✅ Баланс синхронизирован:', data.balance);
+                }
+            }
+        } catch (e) {
+            console.error('❌ Ошибка обработки:', e);
         }
-    } catch (e) {
-        console.error('Ошибка обработки сообщения:', e);
-    }
-});
+    });
+}
 
 // ===== ЭФФЕКТ РЯБИ ПРИ КЛИКЕ =====
 function createRipple(event) {
@@ -123,52 +128,41 @@ function createRipple(event) {
 
 // ===== ВИБРАЦИЯ ДЛЯ TELEGRAM =====
 function hapticFeedback(type = 'light') {
-    if (tg.HapticFeedback) {
+    if (tg?.HapticFeedback) {
         switch(type) {
-            case 'light':
-                tg.HapticFeedback.impactOccurred('light');
-                break;
-            case 'medium':
-                tg.HapticFeedback.impactOccurred('medium');
-                break;
-            case 'heavy':
-                tg.HapticFeedback.impactOccurred('heavy');
-                break;
-            case 'success':
-                tg.HapticFeedback.notificationOccurred('success');
-                break;
-            case 'error':
-                tg.HapticFeedback.notificationOccurred('error');
-                break;
+            case 'light': tg.HapticFeedback.impactOccurred('light'); break;
+            case 'medium': tg.HapticFeedback.impactOccurred('medium'); break;
+            case 'heavy': tg.HapticFeedback.impactOccurred('heavy'); break;
+            case 'success': tg.HapticFeedback.notificationOccurred('success'); break;
+            case 'error': tg.HapticFeedback.notificationOccurred('error'); break;
         }
     }
 }
 
 // ===== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ =====
 window.addEventListener('DOMContentLoaded', () => {
-    // Загрузка баланса из localStorage (временно)
+    console.log('🚀 Инициализация приложения...');
+    
     const savedBalance = localStorage.getItem('balance');
     if (savedBalance) {
         state.balance = parseInt(savedBalance);
         updateBalance(state.balance);
     }
 
-    // Запрос актуального баланса у бота
+    initMainMenu();
+    addSyncButton();
+    
     requestBalance();
 
-    // Если баланс не пришел через 2 секунды, устанавливаем начальный
     setTimeout(() => {
-        if (!state.isBalanceLoaded && state.balance === 0) {
-            updateBalance(1000); // Начальный баланс для демонстрации
+        if (!state.isBalanceLoaded) {
+            console.log('⏰ Таймаут, устанавливаем начальный баланс');
+            const startBalance = parseInt(localStorage.getItem('balance')) || 1000;
+            updateBalance(startBalance);
             state.isBalanceLoaded = true;
         }
-    }, 2000);
+    }, 3000);
 
-    // Инициализация игр
-    initMainMenu();
-    updateBalance(state.balance);
-
-    // Добавление эффекта ряби на все кнопки
     setTimeout(() => {
         document.querySelectorAll('button').forEach(btn => {
             btn.style.position = 'relative';
@@ -184,24 +178,23 @@ function initMainMenu() {
     const mainMenu = document.getElementById('main-menu');
     const gameScreen = document.getElementById('game-screen');
 
-    // Кнопки игр
     document.getElementById('btn-mines')?.addEventListener('click', () => openGame('mines', 'Минное поле'));
     document.getElementById('btn-roulette')?.addEventListener('click', () => openGame('roulette', 'Рулетка'));
     document.getElementById('btn-slots')?.addEventListener('click', () => openGame('slots', 'Слоты'));
     document.getElementById('btn-dice')?.addEventListener('click', () => openGame('dice', 'Кости'));
     document.getElementById('btn-coin')?.addEventListener('click', () => openGame('coin', 'Монетка'));
 
-    // Кнопка "Назад"
     document.getElementById('btn-back')?.addEventListener('click', () => {
         mainMenu.style.display = 'block';
         gameScreen.style.display = 'none';
         state.currentGame = null;
+        requestBalance();
     });
 }
 
 function openGame(gameName, gameTitle) {
     state.currentGame = gameName;
-    hapticFeedback('light'); // Вибрация при открытии игры
+    hapticFeedback('light');
 
     const mainMenu = document.getElementById('main-menu');
     const gameScreen = document.getElementById('game-screen');
@@ -212,26 +205,14 @@ function openGame(gameName, gameTitle) {
     gameScreen.style.display = 'block';
     gameScreenTitle.textContent = gameTitle;
 
-    // Рендеринг игры
     switch(gameName) {
-        case 'mines':
-            renderMinesGame(gameContent);
-            break;
-        case 'roulette':
-            renderRouletteGame(gameContent);
-            break;
-        case 'slots':
-            renderSlotsGame(gameContent);
-            break;
-        case 'dice':
-            renderDiceGame(gameContent);
-            break;
-        case 'coin':
-            renderCoinGame(gameContent);
-            break;
+        case 'mines': renderMinesGame(gameContent); break;
+        case 'roulette': renderRouletteGame(gameContent); break;
+        case 'slots': renderSlotsGame(gameContent); break;
+        case 'dice': renderDiceGame(gameContent); break;
+        case 'coin': renderCoinGame(gameContent); break;
     }
 
-    // Добавление эффекта ряби на новые кнопки
     setTimeout(() => {
         gameContent.querySelectorAll('button').forEach(btn => {
             btn.style.position = 'relative';
@@ -262,14 +243,13 @@ function createBetSelector(onBetChange) {
     html += '<input type="number" id="custom-bet-input" placeholder="Своя ставка" min="1" max="999999">';
     html += '<button id="custom-bet-confirm">✅</button>';
     html += '</div>';
-    html += '<div class="current-bet">Ставка: <span id="current-bet-display">' + state.bet + ' ₽</span></div>';
+    html += '<div class="current-bet">Ставка: <span class="current-bet-display">' + state.bet + ' ₽</span></div>';
     html += '</div>';
 
     return html;
 }
 
 function initBetSelector(container, onBetChange) {
-    // Клики по кнопкам ставок
     container.querySelectorAll('.bet-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const amount = parseInt(e.target.dataset.bet);
@@ -277,7 +257,8 @@ function initBetSelector(container, onBetChange) {
                 state.bet = amount;
                 container.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                container.querySelector('#current-bet-display').textContent = `${state.bet} ₽`;
+                const display = container.querySelector('.current-bet-display');
+                if (display) display.textContent = `${state.bet} ₽`;
                 if (onBetChange) onBetChange(state.bet);
             } else {
                 showMessage('Недостаточно средств!', 'error');
@@ -285,7 +266,6 @@ function initBetSelector(container, onBetChange) {
         });
     });
 
-    // Кастомная ставка
     const customInput = container.querySelector('#custom-bet-input');
     const customConfirm = container.querySelector('#custom-bet-confirm');
 
@@ -294,7 +274,8 @@ function initBetSelector(container, onBetChange) {
         if (amount > 0 && amount <= state.balance) {
             state.bet = amount;
             container.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
-            container.querySelector('#current-bet-display').textContent = `${state.bet} ₽`;
+            const display = container.querySelector('.current-bet-display');
+            if (display) display.textContent = `${state.bet} ₽`;
             customInput.value = '';
             if (onBetChange) onBetChange(state.bet);
         } else if (amount > state.balance) {
@@ -313,7 +294,6 @@ function showMessage(text, type = 'info') {
     messageEl.textContent = text;
     document.body.appendChild(messageEl);
 
-    // Вибрация в зависимости от типа сообщения
     if (type === 'success') {
         hapticFeedback('success');
     } else if (type === 'error') {
@@ -329,12 +309,12 @@ function showMessage(text, type = 'info') {
 }
 
 // ============================================================
-// ИГРА 1: МИННОЕ ПОЛЕ (Mines)
+// ИГРА 1: МИННОЕ ПОЛЕ
 // ============================================================
 
 function renderMinesGame(container) {
     let minesData = {
-        grid: Array(25).fill(false), // false = не открыто
+        grid: Array(25).fill(false),
         mines: [],
         opened: 0,
         gameActive: false,
@@ -361,7 +341,6 @@ function renderMinesGame(container) {
     const openedEl = container.querySelector('#mines-opened');
     const multiplierEl = container.querySelector('#mines-multiplier');
 
-    // Создание поля
     for (let i = 0; i < 25; i++) {
         const cell = document.createElement('div');
         cell.className = 'mines-cell';
@@ -370,7 +349,6 @@ function renderMinesGame(container) {
         grid.appendChild(cell);
     }
 
-    // Начало игры
     startBtn.addEventListener('click', () => {
         if (state.bet > state.balance) {
             showMessage('Недостаточно средств!', 'error');
@@ -380,7 +358,6 @@ function renderMinesGame(container) {
         updateBalance(state.balance - state.bet);
         sendAction('mines_start', { bet: state.bet });
 
-        // Генерация мин
         minesData.mines = [];
         while (minesData.mines.length < 3) {
             const pos = Math.floor(Math.random() * 25);
@@ -407,7 +384,6 @@ function renderMinesGame(container) {
         showMessage('Игра началась! Выбирайте клетки', 'success');
     });
 
-    // Клики по клеткам
     grid.addEventListener('click', (e) => {
         if (!minesData.gameActive) return;
 
@@ -417,12 +393,10 @@ function renderMinesGame(container) {
         const index = parseInt(cell.dataset.index);
 
         if (minesData.mines.includes(index)) {
-            // Мина!
             cell.textContent = '💣';
             cell.classList.add('mine');
             minesData.gameActive = false;
 
-            // Показать все мины
             minesData.mines.forEach(mineIndex => {
                 grid.children[mineIndex].textContent = '💣';
                 grid.children[mineIndex].classList.add('mine');
@@ -433,19 +407,16 @@ function renderMinesGame(container) {
             startBtn.style.display = 'block';
             cashoutBtn.style.display = 'none';
         } else {
-            // Безопасно
             cell.textContent = '✅';
             cell.classList.add('safe', 'opened');
             minesData.grid[index] = true;
             minesData.opened++;
 
-            // Расчет множителя
-            minesData.multiplier = 1.0 + (minesData.opened / (25 - 3)) * 1.5;
+            minesData.multiplier = 1.0 + (minesData.opened / 22) * 1.5;
 
             openedEl.textContent = minesData.opened;
             multiplierEl.textContent = minesData.multiplier.toFixed(2) + 'x';
 
-            // Проверка победы (открыты все 22 безопасных клетки)
             if (minesData.opened === 22) {
                 minesData.gameActive = false;
                 const winAmount = Math.floor(state.bet * minesData.multiplier);
@@ -458,7 +429,6 @@ function renderMinesGame(container) {
         }
     });
 
-    // Забрать выигрыш
     cashoutBtn.addEventListener('click', () => {
         if (!minesData.gameActive) return;
 
@@ -474,7 +444,7 @@ function renderMinesGame(container) {
 }
 
 // ============================================================
-// ИГРА 2: РУЛЕТКА (Roulette)
+// ИГРА 2: РУЛЕТКА
 // ============================================================
 
 function renderRouletteGame(container) {
@@ -510,22 +480,20 @@ function renderRouletteGame(container) {
             }
 
             const betType = btn.dataset.bet;
+            
             updateBalance(state.balance - state.bet);
             isSpinning = true;
 
-            // Анимация прокрутки
             for (let i = 0; i < 8; i++) {
                 wheel.textContent = Math.floor(Math.random() * 37);
                 wheel.style.transform = `scale(${1 + Math.sin(i) * 0.2})`;
                 await sleep(150);
             }
 
-            // Финальное число
             const result = Math.floor(Math.random() * 37);
             wheel.textContent = result;
             wheel.style.transform = 'scale(1.3)';
 
-            // Определение цвета
             let color = 'green';
             if (result !== 0) {
                 color = redNumbers.includes(result) ? 'red' : 'black';
@@ -536,7 +504,6 @@ function renderRouletteGame(container) {
             await sleep(500);
             wheel.style.transform = 'scale(1)';
 
-            // Проверка выигрыша
             let win = false;
             let multiplier = 0;
 
@@ -564,7 +531,7 @@ function renderRouletteGame(container) {
 }
 
 // ============================================================
-// ИГРА 3: СЛОТЫ (Slots)
+// ИГРА 3: СЛОТЫ
 // ============================================================
 
 function renderSlotsGame(container) {
@@ -609,7 +576,6 @@ function renderSlotsGame(container) {
         isSpinning = true;
         spinBtn.disabled = true;
 
-        // Анимация прокрутки
         for (let i = 0; i < 5; i++) {
             reels.forEach(reel => {
                 reel.textContent = symbols[Math.floor(Math.random() * symbols.length)];
@@ -620,7 +586,6 @@ function renderSlotsGame(container) {
             await sleep(50);
         }
 
-        // Финальные символы
         const results = [
             symbols[Math.floor(Math.random() * symbols.length)],
             symbols[Math.floor(Math.random() * symbols.length)],
@@ -635,14 +600,11 @@ function renderSlotsGame(container) {
         await sleep(500);
         reels.forEach(reel => reel.style.transform = 'scale(1)');
 
-        // Проверка выигрыша
         let multiplier = 0;
 
         if (results[0] === results[1] && results[1] === results[2]) {
-            // Три одинаковых
             multiplier = payouts[results[0]] || 2;
         } else if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
-            // Два одинаковых
             multiplier = 2;
         }
 
@@ -662,7 +624,7 @@ function renderSlotsGame(container) {
 }
 
 // ============================================================
-// ИГРА 4: КОСТИ (Dice)
+// ИГРА 4: КОСТИ
 // ============================================================
 
 function renderDiceGame(container) {
@@ -696,17 +658,16 @@ function renderDiceGame(container) {
             }
 
             const betType = btn.dataset.bet;
+            
             updateBalance(state.balance - state.bet);
             isRolling = true;
 
-            // Анимация прокрутки
             for (let i = 0; i < 6; i++) {
                 display.textContent = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
                 display.style.transform = `rotate(${i * 60}deg) scale(1.2)`;
                 await sleep(150);
             }
 
-            // Финальный результат
             const result = Math.floor(Math.random() * 6) + 1;
             display.textContent = `🎲 ${result}`;
             display.style.transform = 'rotate(0deg) scale(1.5)';
@@ -714,7 +675,6 @@ function renderDiceGame(container) {
             await sleep(500);
             display.style.transform = 'rotate(0deg) scale(1)';
 
-            // Проверка выигрыша
             let win = false;
             let multiplier = 0;
 
@@ -745,7 +705,7 @@ function renderDiceGame(container) {
 }
 
 // ============================================================
-// ИГРА 5: МОНЕТКА (Coin)
+// ИГРА 5: МОНЕТКА
 // ============================================================
 
 function renderCoinGame(container) {
@@ -774,10 +734,10 @@ function renderCoinGame(container) {
             }
 
             const betType = btn.dataset.bet;
+            
             updateBalance(state.balance - state.bet);
             isFlipping = true;
 
-            // Анимация прокрутки
             const frames = ['🪙', '🌕', '🪙', '🌗', '🪙', '🌑', '🪙'];
             for (let i = 0; i < frames.length; i++) {
                 display.textContent = frames[i];
@@ -786,7 +746,6 @@ function renderCoinGame(container) {
                 await sleep(200);
             }
 
-            // Финальный результат
             const result = Math.random() < 0.5 ? 'heads' : 'tails';
             display.textContent = result === 'heads' ? '🦅' : '🪙';
             display.style.transform = 'scale(1.5) rotateY(0deg)';
@@ -794,7 +753,6 @@ function renderCoinGame(container) {
             await sleep(500);
             display.style.transform = 'scale(1) rotateY(0deg)';
 
-            // Проверка выигрыша
             if (betType === result) {
                 const winAmount = state.bet * 2;
                 updateBalance(state.balance + winAmount);
@@ -809,3 +767,41 @@ function renderCoinGame(container) {
         });
     });
 }
+
+// ============================================================
+// ПРИНУДИТЕЛЬНАЯ СИНХРОНИЗАЦИЯ
+// ============================================================
+
+function forceSyncBalance() {
+    console.log('🔄 Принудительная синхронизация...');
+    localStorage.removeItem('balance');
+    requestBalance();
+    setTimeout(() => {
+        showMessage(`💰 Баланс синхронизирован: ${state.balance} ₽`, 'success');
+    }, 2000);
+}
+
+function addSyncButton() {
+    const header = document.querySelector('.header');
+    if (header) {
+        const syncBtn = document.createElement('button');
+        syncBtn.textContent = '🔄';
+        syncBtn.style.cssText = `
+            background: rgba(212,175,55,0.2);
+            border: 1px solid #D4AF37;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            cursor: pointer;
+            color: #D4AF37;
+            transition: all 0.3s;
+        `;
+        syncBtn.onclick = forceSyncBalance;
+        header.appendChild(syncBtn);
+    }
+}
+
+console.log('🎰 LUDOMANIKS CASINO загружен!');
+console.log('👤 User ID:', state.userId);
+console.log('💰 Баланс:', state.balance);
