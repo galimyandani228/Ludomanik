@@ -12,7 +12,7 @@ if (tg) {
 
 // --- Состояние игры ---
 const state = {
-    balance: 0,  // Начинаем с 0, потом получим от бота
+    balance: 0,
     userId: null,
     currentGame: null,
     bet: 0,
@@ -78,8 +78,6 @@ function updateBalance(amount) {
     state.balance = Math.max(0, amount);
     balanceEl.textContent = Math.round(amount).toLocaleString('ru-RU');
     state.isBalanceLoaded = true;
-    
-    // Сохраняем в локальное хранилище (для тестов)
     saveBalanceToStorage(amount);
 }
 
@@ -102,17 +100,6 @@ if (tg) {
             
             if (data.action === 'update_balance') {
                 updateBalance(data.balance);
-            }
-            
-            if (data.action === 'balance_updated') {
-                updateBalance(data.balance);
-            }
-            
-            if (data.action === 'game_result') {
-                // Обновляем баланс после игры
-                if (data.balance !== undefined) {
-                    updateBalance(data.balance);
-                }
             }
         } catch (e) {
             // Игнорируем ошибки парсинга
@@ -139,7 +126,6 @@ function setupBackButton() {
 function showMainMenu() {
     mainMenu.style.display = 'flex';
     gameScreen.style.display = 'none';
-    // Обновляем баланс при возврате в меню
     requestBalance();
     sendAction('menu');
 }
@@ -147,7 +133,6 @@ function showMainMenu() {
 // --- Открыть игру ---
 function openGame(game) {
     if (!state.isBalanceLoaded) {
-        // Ждем загрузки баланса
         setTimeout(() => openGame(game), 500);
         return;
     }
@@ -195,10 +180,12 @@ function setupBetControls(betDisplayId, betCallback) {
     document.querySelectorAll('[data-bet]').forEach(btn => {
         btn.addEventListener('click', () => {
             const value = parseInt(btn.dataset.bet);
-            if (value > 0) {
+            if (value > 0 && value <= state.balance) {
                 bet = value;
                 display.textContent = bet;
                 if (betCallback) betCallback(bet);
+            } else if (value > state.balance) {
+                alert(`Недостаточно средств! Доступно: ${state.balance}`);
             }
         });
     });
@@ -324,7 +311,6 @@ function renderMines() {
         revealed = [];
         currentMultiplier = 1.0;
         
-        // Обновляем баланс через бота
         const newBalance = state.balance - bet;
         updateBalance(newBalance);
         sendAction('update_balance', { balance: newBalance });
@@ -519,7 +505,6 @@ function renderRoulette() {
             numEl.textContent = number;
             numEl.className = `roulette-number ${color}`;
             
-            // Списываем ставку
             let newBalance = state.balance - bet;
             updateBalance(newBalance);
             sendAction('update_balance', { balance: newBalance });
@@ -633,7 +618,6 @@ function renderSlots() {
         ];
         display.textContent = results.join(' ');
         
-        // Списываем ставку
         let newBalance = state.balance - bet;
         updateBalance(newBalance);
         sendAction('update_balance', { balance: newBalance });
@@ -751,7 +735,6 @@ function renderDice() {
             const roll = Math.floor(Math.random() * 6) + 1;
             display.textContent = `🎲 ${roll}`;
             
-            // Списываем ставку
             let newBalance = state.balance - bet;
             updateBalance(newBalance);
             sendAction('update_balance', { balance: newBalance });
@@ -779,4 +762,121 @@ function renderDice() {
             }
             
             rolling = false;
-       
+        });
+    });
+}
+
+// ============================================================
+// 🪙 МОНЕТКА
+// ============================================================
+function renderCoin() {
+    const html = `
+        <div class="game-info">
+            <div class="bet-label">СТАВКА</div>
+            <div class="bet-value" id="coinBet">100</div>
+        </div>
+        <div class="game-buttons">
+            <button class="btn" data-bet="10">10</button>
+            <button class="btn" data-bet="25">25</button>
+            <button class="btn" data-bet="50">50</button>
+            <button class="btn" data-bet="100">100</button>
+            <button class="btn" data-bet="250">250</button>
+            <button class="btn" data-bet="500">500</button>
+            <button class="btn" data-bet="1000">1000</button>
+            <button class="btn" data-bet="5000">5000</button>
+        </div>
+        <div class="game-buttons" style="gap: 6px;">
+            <input type="number" class="custom-bet-input" placeholder="Своя ставка" min="1" style="
+                background: rgba(20,20,40,0.5);
+                border: 1px solid rgba(100,100,200,0.12);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: #b8b8d0;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                width: 60%;
+                max-width: 180px;
+                text-align: center;
+                outline: none;
+            ">
+            <button class="btn btn-primary custom-bet-btn" style="width: 35%; max-width: 120px;">✅</button>
+        </div>
+        <div class="coin-display" id="coinDisplay">🪙</div>
+        <div class="game-buttons">
+            <button class="btn" data-choice="heads">🦅 ОРЁЛ</button>
+            <button class="btn" data-choice="tails">🪙 РЕШКА</button>
+        </div>
+        <div class="game-result" id="coinResult">💰 Доступно: ${state.balance}</div>
+    `;
+    gameContent.innerHTML = html;
+    
+    let bet = 100;
+    let flipping = false;
+    
+    // Настройка ставок
+    const betControls = setupBetControls('coinBet', (newBet) => {
+        bet = newBet;
+    });
+    
+    document.querySelectorAll('[data-choice]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (flipping) return;
+            if (state.balance < bet) {
+                document.getElementById('coinResult').textContent = '❌ Недостаточно средств!';
+                document.getElementById('coinResult').className = 'game-result lose';
+                return;
+            }
+            
+            flipping = true;
+            const choice = btn.dataset.choice;
+            const display = document.getElementById('coinDisplay');
+            
+            // Анимация
+            const frames = ['🪙', '🌕', '🪙', '🌗', '🪙', '🌑', '🪙'];
+            for (const frame of frames) {
+                display.textContent = frame;
+                display.style.transform = 'scale(1.2)';
+                await sleep(150);
+                display.style.transform = 'scale(1)';
+                await sleep(50);
+            }
+            
+            // Результат
+            const result = Math.random() < 0.5 ? 'heads' : 'tails';
+            display.textContent = result === 'heads' ? '🦅' : '🪙';
+            
+            let newBalance = state.balance - bet;
+            updateBalance(newBalance);
+            sendAction('update_balance', { balance: newBalance });
+            
+            const win = (choice === result);
+            const resultEl = document.getElementById('coinResult');
+            
+            if (win) {
+                const winAmount = bet * 2;
+                newBalance = state.balance + winAmount;
+                updateBalance(newBalance);
+                sendAction('update_balance', { balance: newBalance });
+                resultEl.textContent = `🎉 ВЫИГРЫШ! +${winAmount.toLocaleString('ru-RU')} 💰`;
+                resultEl.className = 'game-result win';
+                sendAction('coin_win', { win: winAmount });
+            } else {
+                resultEl.textContent = `😢 Проигрыш: ${bet.toLocaleString('ru-RU')} 💰`;
+                resultEl.className = 'game-result lose';
+                sendAction('coin_lose');
+            }
+            
+            flipping = false;
+        });
+    });
+}
+
+// ============================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ============================================================
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+console.log('🎰 LUDOMANIKS CASINO загружен!');
