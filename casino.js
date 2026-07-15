@@ -1,8 +1,14 @@
-// ===== TELEGRAM WEB APP ИНИЦИАЛИЗАЦИЯ =====
+// ============================================================
+// LUDOMANIKS CASINO — Mini App Script (Flask API версия)
+// ============================================================
+
+// ===== КОНФИГ =====
+// ⚠️ ЗАМЕНИ ЭТУ СТРОКУ НА СВОЙ IP, ЕСЛИ БОТ НЕ НА ТВОЁМ КОМПЬЮТЕРЕ!
+const API_URL = 'http://localhost:5000';
+
+// ===== TELEGRAM WEB APP =====
 const tg = window.Telegram?.WebApp;
-if (!tg) {
-    console.error('❌ Telegram WebApp не найден!');
-} else {
+if (tg) {
     tg.ready();
     tg.expand();
     tg.MainButton.hide();
@@ -10,37 +16,7 @@ if (!tg) {
     tg.setBackgroundColor('#050505');
 }
 
-// ===== ПАРАЛЛАКС-ЭФФЕКТ ПРИ ДВИЖЕНИИ МЫШИ =====
-let mouseX = 0;
-let mouseY = 0;
-
-if (window.innerWidth > 768) {
-    document.addEventListener('mousemove', (e) => {
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-
-        mouseX = (e.clientX - centerX) / centerX * 50;
-        mouseY = (e.clientY - centerY) / centerY * 50;
-
-        document.documentElement.style.setProperty('--mouse-x', mouseX);
-        document.documentElement.style.setProperty('--mouse-y', mouseY);
-    });
-}
-
-if (window.DeviceOrientationEvent && window.innerWidth <= 768) {
-    window.addEventListener('deviceorientation', (e) => {
-        mouseX = (e.gamma || 0) * 2;
-        mouseY = (e.beta || 0) * 2;
-
-        mouseX = Math.max(-50, Math.min(50, mouseX));
-        mouseY = Math.max(-50, Math.min(50, mouseY));
-
-        document.documentElement.style.setProperty('--mouse-x', mouseX);
-        document.documentElement.style.setProperty('--mouse-y', mouseY);
-    });
-}
-
-// ===== СОСТОЯНИЕ ПРИЛОЖЕНИЯ =====
+// ===== СОСТОЯНИЕ =====
 const state = {
     balance: 0,
     userId: tg?.initDataUnsafe?.user?.id || 0,
@@ -52,18 +28,44 @@ const state = {
 // ===== УТИЛИТЫ =====
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// ===== СИНХРОНИЗАЦИЯ С БОТОМ =====
+// ===== HTTP ЗАПРОСЫ К БОТУ (Flask API) =====
 
-function sendAction(action, data = {}) {
-    if (!tg) {
-        console.warn('⚠️ Telegram WebApp не инициализирован');
-        return;
+async function requestBalance() {
+    try {
+        const res = await fetch(`${API_URL}/api/balance?user_id=${state.userId}`);
+        const data = await res.json();
+        if (data.balance !== undefined) {
+            updateBalance(data.balance);
+            state.isBalanceLoaded = true;
+        }
+        return data;
+    } catch (e) {
+        console.error('❌ Ошибка получения баланса:', e);
     }
-    const payload = { action, ...data };
-    console.log('📤 Отправка боту:', JSON.stringify(payload));
-    tg.sendData(JSON.stringify(payload));
 }
 
+async function sendGameResult(action, amount) {
+    try {
+        const res = await fetch(`${API_URL}/api/balance`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                user_id: state.userId, 
+                action: action, 
+                amount: amount 
+            })
+        });
+        const data = await res.json();
+        if (data.balance !== undefined) {
+            updateBalance(data.balance);
+        }
+        return data;
+    } catch (e) {
+        console.error('❌ Ошибка отправки:', e);
+    }
+}
+
+// ===== ОБНОВЛЕНИЕ БАЛАНСА =====
 function updateBalance(newBalance) {
     state.balance = Math.max(0, newBalance);
     
@@ -81,32 +83,7 @@ function updateBalance(newBalance) {
     console.log('💰 Баланс обновлен:', state.balance);
 }
 
-function requestBalance() {
-    console.log('📥 Запрос баланса...');
-    sendAction('get_balance');
-}
-
-// Обработка входящих сообщений от бота
-if (tg) {
-    tg.onEvent('message', (event) => {
-        try {
-            const data = JSON.parse(event.data);
-            console.log('📩 Получено от бота:', data);
-
-            if (data.action === 'balance_updated' || data.action === 'update_balance') {
-                if (data.balance !== undefined) {
-                    state.isBalanceLoaded = true;
-                    updateBalance(data.balance);
-                    console.log('✅ Баланс синхронизирован:', data.balance);
-                }
-            }
-        } catch (e) {
-            console.error('❌ Ошибка обработки:', e);
-        }
-    });
-}
-
-// ===== ЭФФЕКТ РЯБИ ПРИ КЛИКЕ =====
+// ===== ЭФФЕКТ РЯБИ =====
 function createRipple(event) {
     const button = event.currentTarget;
     const ripple = document.createElement('span');
@@ -122,11 +99,10 @@ function createRipple(event) {
     ripple.style.top = y + 'px';
 
     button.appendChild(ripple);
-
     setTimeout(() => ripple.remove(), 600);
 }
 
-// ===== ВИБРАЦИЯ ДЛЯ TELEGRAM =====
+// ===== ВИБРАЦИЯ =====
 function hapticFeedback(type = 'light') {
     if (tg?.HapticFeedback) {
         switch(type) {
@@ -139,9 +115,30 @@ function hapticFeedback(type = 'light') {
     }
 }
 
-// ===== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ =====
-window.addEventListener('DOMContentLoaded', () => {
+// ===== УВЕДОМЛЕНИЯ =====
+function showMessage(text, type = 'info') {
+    const messageEl = document.createElement('div');
+    messageEl.className = `game-message ${type}`;
+    messageEl.textContent = text;
+    document.body.appendChild(messageEl);
+
+    if (type === 'success') hapticFeedback('success');
+    else if (type === 'error') hapticFeedback('error');
+    else hapticFeedback('light');
+
+    setTimeout(() => {
+        messageEl.style.opacity = '0';
+        setTimeout(() => messageEl.remove(), 300);
+    }, 2000);
+}
+
+// ============================================================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация приложения...');
+    console.log('👤 User ID:', state.userId);
     
     const savedBalance = localStorage.getItem('balance');
     if (savedBalance) {
@@ -151,7 +148,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     initMainMenu();
     addSyncButton();
-    
+
     requestBalance();
 
     setTimeout(() => {
@@ -172,17 +169,19 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100);
 });
 
-// ===== НАВИГАЦИЯ =====
+// ============================================================
+// НАВИГАЦИЯ
+// ============================================================
 
 function initMainMenu() {
     const mainMenu = document.getElementById('main-menu');
     const gameScreen = document.getElementById('game-screen');
 
-    document.getElementById('btn-mines')?.addEventListener('click', () => openGame('mines', 'Минное поле'));
-    document.getElementById('btn-roulette')?.addEventListener('click', () => openGame('roulette', 'Рулетка'));
-    document.getElementById('btn-slots')?.addEventListener('click', () => openGame('slots', 'Слоты'));
-    document.getElementById('btn-dice')?.addEventListener('click', () => openGame('dice', 'Кости'));
-    document.getElementById('btn-coin')?.addEventListener('click', () => openGame('coin', 'Монетка'));
+    document.getElementById('btn-mines')?.addEventListener('click', () => openGame('mines', '💣 Минное поле'));
+    document.getElementById('btn-roulette')?.addEventListener('click', () => openGame('roulette', '🎡 Рулетка'));
+    document.getElementById('btn-slots')?.addEventListener('click', () => openGame('slots', '🎰 Слоты'));
+    document.getElementById('btn-dice')?.addEventListener('click', () => openGame('dice', '🎲 Кости'));
+    document.getElementById('btn-coin')?.addEventListener('click', () => openGame('coin', '🪙 Монетка'));
 
     document.getElementById('btn-back')?.addEventListener('click', () => {
         mainMenu.style.display = 'block';
@@ -225,7 +224,9 @@ function openGame(gameName, gameTitle) {
     }, 100);
 }
 
-// ===== КОМПОНЕНТ СТАВОК =====
+// ============================================================
+// КОМПОНЕНТ СТАВОК
+// ============================================================
 
 function createBetSelector(onBetChange) {
     const betAmounts = [10, 25, 50, 100, 250, 500, 1000, 5000];
@@ -286,26 +287,39 @@ function initBetSelector(container, onBetChange) {
     });
 }
 
-// ===== УВЕДОМЛЕНИЯ =====
+// ============================================================
+// КНОПКА СИНХРОНИЗАЦИИ
+// ============================================================
 
-function showMessage(text, type = 'info') {
-    const messageEl = document.createElement('div');
-    messageEl.className = `game-message ${type}`;
-    messageEl.textContent = text;
-    document.body.appendChild(messageEl);
-
-    if (type === 'success') {
-        hapticFeedback('success');
-    } else if (type === 'error') {
-        hapticFeedback('error');
-    } else {
-        hapticFeedback('light');
-    }
-
+function forceSyncBalance() {
+    console.log('🔄 Принудительная синхронизация...');
+    localStorage.removeItem('balance');
+    requestBalance();
     setTimeout(() => {
-        messageEl.style.opacity = '0';
-        setTimeout(() => messageEl.remove(), 300);
-    }, 2000);
+        showMessage(`💰 Баланс синхронизирован: ${state.balance} ₽`, 'success');
+    }, 1500);
+}
+
+function addSyncButton() {
+    const header = document.querySelector('.header');
+    if (header) {
+        const syncBtn = document.createElement('button');
+        syncBtn.textContent = '🔄';
+        syncBtn.style.cssText = `
+            background: rgba(212,175,55,0.2);
+            border: 1px solid #D4AF37;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            cursor: pointer;
+            color: #D4AF37;
+            transition: all 0.3s;
+            margin-left: 10px;
+        `;
+        syncBtn.onclick = forceSyncBalance;
+        header.appendChild(syncBtn);
+    }
 }
 
 // ============================================================
@@ -328,8 +342,8 @@ function renderMinesGame(container) {
     html += '<div>Множитель: <span id="mines-multiplier">1.00x</span></div>';
     html += '</div>';
     html += '<div class="mines-grid" id="mines-grid"></div>';
-    html += '<button class="game-action-btn" id="mines-start">Начать игру</button>';
-    html += '<button class="game-action-btn secondary" id="mines-cashout" style="display:none;">Забрать выигрыш</button>';
+    html += '<button class="game-action-btn" id="mines-start">🚀 Начать игру</button>';
+    html += '<button class="game-action-btn secondary" id="mines-cashout" style="display:none;">💵 Забрать выигрыш</button>';
     html += '</div>';
 
     container.innerHTML = html;
@@ -356,7 +370,7 @@ function renderMinesGame(container) {
         }
 
         updateBalance(state.balance - state.bet);
-        sendAction('mines_start', { bet: state.bet });
+        sendGameResult('lose', state.bet);
 
         minesData.mines = [];
         while (minesData.mines.length < 3) {
@@ -402,8 +416,7 @@ function renderMinesGame(container) {
                 grid.children[mineIndex].classList.add('mine');
             });
 
-            sendAction('mines_lose', { bet: state.bet, opened: minesData.opened });
-            showMessage('Вы взорвались! Проигрыш!', 'error');
+            showMessage('💥 Вы взорвались! Проигрыш!', 'error');
             startBtn.style.display = 'block';
             cashoutBtn.style.display = 'none';
         } else {
@@ -421,8 +434,8 @@ function renderMinesGame(container) {
                 minesData.gameActive = false;
                 const winAmount = Math.floor(state.bet * minesData.multiplier);
                 updateBalance(state.balance + winAmount);
-                sendAction('mines_win', { bet: state.bet, win: winAmount, multiplier: minesData.multiplier });
-                showMessage(`Победа! +${winAmount} ₽`, 'success');
+                sendGameResult('win', winAmount);
+                showMessage(`🎉 Победа! +${winAmount} ₽`, 'success');
                 startBtn.style.display = 'block';
                 cashoutBtn.style.display = 'none';
             }
@@ -434,10 +447,10 @@ function renderMinesGame(container) {
 
         const winAmount = Math.floor(state.bet * minesData.multiplier);
         updateBalance(state.balance + winAmount);
+        sendGameResult('win', winAmount);
         minesData.gameActive = false;
 
-        sendAction('mines_cashout', { bet: state.bet, win: winAmount, multiplier: minesData.multiplier });
-        showMessage(`Вы забрали ${winAmount} ₽`, 'success');
+        showMessage(`✅ Вы забрали ${winAmount} ₽`, 'success');
         startBtn.style.display = 'block';
         cashoutBtn.style.display = 'none';
     });
@@ -452,15 +465,15 @@ function renderRouletteGame(container) {
 
     let html = createBetSelector();
     html += '<div class="roulette-container">';
-    html += '<div class="roulette-wheel" id="roulette-wheel">?</div>';
+    html += '<div class="roulette-wheel" id="roulette-wheel">🎡</div>';
     html += '<div class="roulette-bets">';
-    html += '<button class="roulette-bet red" data-bet="red">Красное (x2)</button>';
-    html += '<button class="roulette-bet black" data-bet="black">Чёрное (x2)</button>';
-    html += '<button class="roulette-bet green" data-bet="zero">Зеро (x14)</button>';
+    html += '<button class="roulette-bet red" data-bet="red">🔴 Красное (x2)</button>';
+    html += '<button class="roulette-bet black" data-bet="black">⚫ Чёрное (x2)</button>';
+    html += '<button class="roulette-bet green" data-bet="zero">🟢 Зеро (x14)</button>';
     html += '<button class="roulette-bet" data-bet="even">Чёт (x2)</button>';
     html += '<button class="roulette-bet" data-bet="odd">Нечет (x2)</button>';
-    html += '<button class="roulette-bet" data-bet="1-18">1-18 (x2)</button>';
-    html += '<button class="roulette-bet" data-bet="19-36">19-36 (x2)</button>';
+    html += '<button class="roulette-bet" data-bet="low">1-18 (x2)</button>';
+    html += '<button class="roulette-bet" data-bet="high">19-36 (x2)</button>';
     html += '</div>';
     html += '</div>';
 
@@ -482,6 +495,7 @@ function renderRouletteGame(container) {
             const betType = btn.dataset.bet;
             
             updateBalance(state.balance - state.bet);
+            sendGameResult('lose', state.bet);
             isSpinning = true;
 
             for (let i = 0; i < 8; i++) {
@@ -512,17 +526,16 @@ function renderRouletteGame(container) {
             else if (betType === 'zero' && result === 0) { win = true; multiplier = 14; }
             else if (betType === 'even' && result !== 0 && result % 2 === 0) { win = true; multiplier = 2; }
             else if (betType === 'odd' && result % 2 === 1) { win = true; multiplier = 2; }
-            else if (betType === '1-18' && result >= 1 && result <= 18) { win = true; multiplier = 2; }
-            else if (betType === '19-36' && result >= 19 && result <= 36) { win = true; multiplier = 2; }
+            else if (betType === 'low' && result >= 1 && result <= 18) { win = true; multiplier = 2; }
+            else if (betType === 'high' && result >= 19 && result <= 36) { win = true; multiplier = 2; }
 
             if (win) {
                 const winAmount = state.bet * multiplier;
                 updateBalance(state.balance + winAmount);
-                sendAction('roulette_win', { bet: state.bet, win: winAmount, result, betType });
-                showMessage(`Победа! +${winAmount} ₽`, 'success');
+                sendGameResult('win', winAmount);
+                showMessage(`🎉 Победа! +${winAmount} ₽`, 'success');
             } else {
-                sendAction('roulette_lose', { bet: state.bet, result, betType });
-                showMessage('Проигрыш!', 'error');
+                showMessage('😢 Проигрыш!', 'error');
             }
 
             isSpinning = false;
@@ -548,12 +561,12 @@ function renderSlotsGame(container) {
     html += '<div class="slots-reel" id="reel-2">🍋</div>';
     html += '<div class="slots-reel" id="reel-3">🍊</div>';
     html += '</div>';
-    html += '<button class="game-action-btn" id="slots-spin">Крутить (Ставка: ' + state.bet + ' ₽)</button>';
+    html += '<button class="game-action-btn" id="slots-spin">🎰 Крутить (Ставка: ' + state.bet + ' ₽)</button>';
     html += '</div>';
 
     container.innerHTML = html;
     initBetSelector(container, (bet) => {
-        container.querySelector('#slots-spin').textContent = `Крутить (Ставка: ${bet} ₽)`;
+        container.querySelector('#slots-spin').textContent = `🎰 Крутить (Ставка: ${bet} ₽)`;
     });
 
     const reels = [
@@ -573,6 +586,7 @@ function renderSlotsGame(container) {
         }
 
         updateBalance(state.balance - state.bet);
+        sendGameResult('lose', state.bet);
         isSpinning = true;
         spinBtn.disabled = true;
 
@@ -611,11 +625,10 @@ function renderSlotsGame(container) {
         if (multiplier > 0) {
             const winAmount = state.bet * multiplier;
             updateBalance(state.balance + winAmount);
-            sendAction('slots_win', { bet: state.bet, win: winAmount, results, multiplier });
-            showMessage(`Победа! +${winAmount} ₽ (x${multiplier})`, 'success');
+            sendGameResult('win', winAmount);
+            showMessage(`🎉 Победа! +${winAmount} ₽ (x${multiplier})`, 'success');
         } else {
-            sendAction('slots_lose', { bet: state.bet, results });
-            showMessage('Проигрыш!', 'error');
+            showMessage('😢 Проигрыш!', 'error');
         }
 
         isSpinning = false;
@@ -632,8 +645,8 @@ function renderDiceGame(container) {
     html += '<div class="dice-container">';
     html += '<div class="dice-display" id="dice-result">🎲 ?</div>';
     html += '<div class="dice-bets">';
-    html += '<button class="dice-bet" data-bet="1-3">1-3 (x1.9)</button>';
-    html += '<button class="dice-bet" data-bet="4-6">4-6 (x1.9)</button>';
+    html += '<button class="dice-bet" data-bet="under">⬇️ 1-3 (x1.9)</button>';
+    html += '<button class="dice-bet" data-bet="over">⬆️ 4-6 (x1.9)</button>';
 
     for (let i = 1; i <= 6; i++) {
         html += `<button class="dice-bet small" data-bet="${i}">${i} (x5)</button>`;
@@ -660,6 +673,7 @@ function renderDiceGame(container) {
             const betType = btn.dataset.bet;
             
             updateBalance(state.balance - state.bet);
+            sendGameResult('lose', state.bet);
             isRolling = true;
 
             for (let i = 0; i < 6; i++) {
@@ -678,13 +692,13 @@ function renderDiceGame(container) {
             let win = false;
             let multiplier = 0;
 
-            if (betType === '1-3' && result >= 1 && result <= 3) {
+            if (betType === 'under' && result >= 1 && result <= 3) {
                 win = true;
                 multiplier = 1.9;
-            } else if (betType === '4-6' && result >= 4 && result <= 6) {
+            } else if (betType === 'over' && result >= 4 && result <= 6) {
                 win = true;
                 multiplier = 1.9;
-            } else if (betType === result.toString()) {
+            } else if (parseInt(betType) === result) {
                 win = true;
                 multiplier = 5;
             }
@@ -692,11 +706,10 @@ function renderDiceGame(container) {
             if (win) {
                 const winAmount = Math.floor(state.bet * multiplier);
                 updateBalance(state.balance + winAmount);
-                sendAction('dice_win', { bet: state.bet, win: winAmount, result, betType });
-                showMessage(`Победа! +${winAmount} ₽`, 'success');
+                sendGameResult('win', winAmount);
+                showMessage(`🎉 Победа! +${winAmount} ₽`, 'success');
             } else {
-                sendAction('dice_lose', { bet: state.bet, result, betType });
-                showMessage('Проигрыш!', 'error');
+                showMessage('😢 Проигрыш!', 'error');
             }
 
             isRolling = false;
@@ -736,6 +749,7 @@ function renderCoinGame(container) {
             const betType = btn.dataset.bet;
             
             updateBalance(state.balance - state.bet);
+            sendGameResult('lose', state.bet);
             isFlipping = true;
 
             const frames = ['🪙', '🌕', '🪙', '🌗', '🪙', '🌑', '🪙'];
@@ -756,50 +770,15 @@ function renderCoinGame(container) {
             if (betType === result) {
                 const winAmount = state.bet * 2;
                 updateBalance(state.balance + winAmount);
-                sendAction('coin_win', { bet: state.bet, win: winAmount, result });
-                showMessage(`Победа! +${winAmount} ₽`, 'success');
+                sendGameResult('win', winAmount);
+                showMessage(`🎉 Победа! +${winAmount} ₽`, 'success');
             } else {
-                sendAction('coin_lose', { bet: state.bet, result });
-                showMessage('Проигрыш!', 'error');
+                showMessage('😢 Проигрыш!', 'error');
             }
 
             isFlipping = false;
         });
     });
-}
-
-// ============================================================
-// ПРИНУДИТЕЛЬНАЯ СИНХРОНИЗАЦИЯ
-// ============================================================
-
-function forceSyncBalance() {
-    console.log('🔄 Принудительная синхронизация...');
-    localStorage.removeItem('balance');
-    requestBalance();
-    setTimeout(() => {
-        showMessage(`💰 Баланс синхронизирован: ${state.balance} ₽`, 'success');
-    }, 2000);
-}
-
-function addSyncButton() {
-    const header = document.querySelector('.header');
-    if (header) {
-        const syncBtn = document.createElement('button');
-        syncBtn.textContent = '🔄';
-        syncBtn.style.cssText = `
-            background: rgba(212,175,55,0.2);
-            border: 1px solid #D4AF37;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            font-size: 18px;
-            cursor: pointer;
-            color: #D4AF37;
-            transition: all 0.3s;
-        `;
-        syncBtn.onclick = forceSyncBalance;
-        header.appendChild(syncBtn);
-    }
 }
 
 console.log('🎰 LUDOMANIKS CASINO загружен!');
