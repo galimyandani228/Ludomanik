@@ -1,525 +1,394 @@
-/* === CASINO PREMIUM CSS === */
-/* Импорт премиум шрифтов */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
+/* ==========================================================================
+   CASINO PREMIUM THEME
+   Темная тема с фиолетовым оттенком и золотыми акцентами
+   Шрифты: Playfair Display, Cinzel, Montserrat (Google Fonts)
+   ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   1. ПОДКЛЮЧЕНИЕ ШРИФТОВ
+   -------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,600&family=Cinzel:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+/* --------------------------------------------------------------------------
+   2. CSS-ПЕРЕМЕННЫЕ (ДИЗАЙН-ТОКЕНЫ)
+   -------------------------------------------------------------------------- */
 :root {
-  --gold: #D4AF37;
-  --gold-light: #F3E5AB;
-  --gold-dark: #B8860B;
-  --black: #0a0a0a;
-  --deep-purple: #1a0a2e;
-  --red: #8B0000;
-  --red-neon: #ff1a1a;
-  --white: #ffffff;
-  --card-bg: rgba(26, 10, 46, 0.9);
+  /* --- Базовые цвета фона --- */
+  --color-bg-black: #08060c;
+  --color-bg-purple-deep: #120a1e;
+  --color-bg-purple: #1a0f2e;
+  --color-bg-purple-light: #241539;
+
+  /* --- Золотой акцент --- */
+  --color-gold: #D4AF37;
+  --color-gold-light: #F4E5B2;
+  --color-gold-dark: #9c7f24;
+  --color-gold-rgb: 212, 175, 55;
+
+  /* --- Фиолетовый акцент (для свечений и градиентов) --- */
+  --color-violet: #7b2ff7;
+  --color-violet-light: #a855f7;
+  --color-violet-rgb: 123, 47, 247;
+
+  /* --- Текст --- */
+  --color-text-primary: #f5f0e6;
+  --color-text-secondary: #b8aec4;
+  --color-text-muted: #6f6580;
+
+  /* --- Градиенты --- */
+  --gradient-bg-main: radial-gradient(ellipse at top, var(--color-bg-purple) 0%, var(--color-bg-black) 60%);
+  --gradient-gold: linear-gradient(135deg, var(--color-gold-dark) 0%, var(--color-gold) 45%, var(--color-gold-light) 55%, var(--color-gold) 100%);
+  --gradient-gold-text: linear-gradient(90deg, #b8860b, #ffe9a8, #D4AF37, #ffdf80);
+  --gradient-glow: radial-gradient(circle, rgba(var(--color-gold-rgb), 0.25) 0%, rgba(var(--color-violet-rgb), 0.15) 45%, transparent 70%);
+
+  /* --- Glassmorphism --- */
+  --glass-bg: rgba(30, 18, 48, 0.45);
+  --glass-bg-strong: rgba(36, 21, 57, 0.65);
+  --glass-border: rgba(var(--color-gold-rgb), 0.25);
+  --glass-blur: 16px;
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+
+  /* --- Тени и свечения --- */
+  --shadow-gold-glow: 0 0 20px rgba(var(--color-gold-rgb), 0.35), 0 0 40px rgba(var(--color-gold-rgb), 0.15);
+  --shadow-violet-glow: 0 0 25px rgba(var(--color-violet-rgb), 0.4), 0 0 50px rgba(var(--color-violet-rgb), 0.2);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+  /* --- Шрифты --- */
+  --font-display: 'Playfair Display', serif;
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'Montserrat', sans-serif;
+
+  /* --- Радиусы --- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-round: 50%;
+
+  /* --- Переходы --- */
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Отступы (базовая сетка) --- */
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+
+  /* --- Z-индексы --- */
+  --z-bg: -1;
+  --z-content: 1;
+  --z-header: 10;
+  --z-modal: 100;
 }
 
-* {
+/* --------------------------------------------------------------------------
+   3. СБРОС СТИЛЕЙ И БАЗОВЫЕ НАСТРОЙКИ
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'Montserrat', sans-serif;
-  background: var(--black);
-  color: var(--white);
+  min-height: 100vh;
+  background-color: var(--color-bg-black);
+  background-image: var(--gradient-bg-main);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  line-height: 1.6;
   overflow-x: hidden;
-  cursor: default;
+  position: relative;
 }
 
-/* === АНИМИРОВАННЫЙ ФОН С ЧАСТИЦАМИ === */
-body::before {
+/* Типографика */
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   4. АНИМИРОВАННЫЙ ФОН: ЧАСТИЦЫ И ГРАДИЕНТНЫЕ СВЕЧЕНИЯ
+   -------------------------------------------------------------------------- */
+
+/* Контейнер фона — располагается фиксированно позади всего контента */
+.bg-animated {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-bg);
+  overflow: hidden;
+  background: var(--color-bg-black);
+}
+
+/* Пульсирующие цветовые пятна (ambient glow) */
+.bg-animated::before,
+.bg-animated::after {
   content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(26, 10, 46, 0.9) 0%, transparent 50%),
-    linear-gradient(180deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
-  z-index: -2;
-  animation: bgPulse 8s ease-in-out infinite alternate;
+  position: absolute;
+  width: 60vw;
+  height: 60vw;
+  border-radius: var(--radius-round);
+  filter: blur(90px);
+  opacity: 0.5;
+  animation: floatGlow 18s ease-in-out infinite alternate;
 }
 
-/* Анимированные золотые частицы */
-.particles-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: -1;
+.bg-animated::before {
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(var(--color-violet-rgb), 0.5), transparent 70%);
+}
+
+.bg-animated::after {
+  bottom: -15%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(var(--color-gold-rgb), 0.35), transparent 70%);
+  animation-delay: 4s;
+}
+
+@keyframes floatGlow {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(5%, 8%) scale(1.15);
+  }
+  100% {
+    transform: translate(-5%, -4%) scale(0.95);
+  }
+}
+
+/* Частицы — плавающие золотые точки. Каждый .particle позиционируется
+   через inline-style (--x, --y, --delay, --duration) либо через nth-child */
+.particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 }
 
 .particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
-  background: var(--gold);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold);
-  animation: floatParticle 6s ease-in-out infinite;
+  bottom: -10px;
+  width: var(--size, 4px);
+  height: var(--size, 4px);
+  left: var(--x, 50%);
+  background: var(--color-gold-light);
+  border-radius: var(--radius-round);
+  box-shadow: 0 0 6px 2px rgba(var(--color-gold-rgb), 0.6);
+  opacity: 0;
+  animation: particleRise var(--duration, 12s) linear infinite;
+  animation-delay: var(--delay, 0s);
 }
 
-.particle:nth-child(1) { left: 10%; animation-delay: 0s; }
-.particle:nth-child(2) { left: 25%; animation-delay: 1.2s; }
-.particle:nth-child(3) { left: 40%; animation-delay: 0.8s; }
-.particle:nth-child(4) { left: 55%; animation-delay: 2s; }
-.particle:nth-child(5) { left: 70%; animation-delay: 1.5s; }
-.particle:nth-child(6) { left: 85%; animation-delay: 0.3s; }
-.particle:nth-child(7) { left: 15%; animation-delay: 2.5s; }
-.particle:nth-child(8) { left: 95%; animation-delay: 1.7s; }
-
-@keyframes floatParticle {
-  0%, 100% { 
-    transform: translateY(100vh) rotate(0deg); 
+@keyframes particleRise {
+  0% {
+    transform: translateY(0) translateX(0);
     opacity: 0;
   }
-  10% { 
-    opacity: 1;
+  10% {
+    opacity: 0.9;
   }
-  90% { 
-    opacity: 1;
+  90% {
+    opacity: 0.4;
   }
-  100% { 
-    transform: translateY(-100vh) rotate(720deg); 
+  100% {
+    transform: translateY(-110vh) translateX(20px);
     opacity: 0;
   }
 }
 
-@keyframes bgPulse {
-  0% { opacity: 0.8; }
-  50% { opacity: 1; }
-  100% { opacity: 0.8; }
-}
+/* Пример автогенерации частиц через nth-child (если нет JS) */
+.particle:nth-child(1) { --x: 5%;  --size: 3px; --duration: 14s; --delay: 0s; }
+.particle:nth-child(2) { --x: 15%; --size: 5px; --duration: 18s; --delay: 2s; }
+.particle:nth-child(3) { --x: 25%; --size: 2px; --duration: 10s; --delay: 1s; }
+.particle:nth-child(4) { --x: 40%; --size: 4px; --duration: 16s; --delay: 3s; }
+.particle:nth-child(5) { --x: 55%; --size: 3px; --duration: 12s; --delay: 0.5s; }
+.particle:nth-child(6) { --x: 68%; --size: 6px; --duration: 20s; --delay: 4s; }
+.particle:nth-child(7) { --x: 78%; --size: 2px; --duration: 9s;  --delay: 2.5s; }
+.particle:nth-child(8) { --x: 90%; --size: 4px; --duration: 15s; --delay: 1.5s; }
 
-/* === ПРЕМИУМ ШАПКА === */
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: linear-gradient(180deg, rgba(10,10,10,0.98) 0%, rgba(10,10,10,0.8) 100%);
-  backdrop-filter: blur(20px);
-  border-bottom: 2px solid var(--gold);
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.3s ease;
-}
-
-.header::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  animation: shine 3s linear infinite;
-}
-
-.logo {
-  font-family: 'Cinzel', serif;
-  font-size: 2.5rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 30px rgba(212,175,55,0.5);
-  transition: all 0.3s ease;
-  letter-spacing: 3px;
-}
-
-.logo:hover {
-  transform: scale(1.05);
-  filter: brightness(1.5);
-}
-
-/* Навигация */
-.nav {
-  display: flex;
-  gap: 2rem;
-}
-
-.nav-item {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--white);
-  text-decoration: none;
+/* --------------------------------------------------------------------------
+   5. GLASSMORPHISM — СТЕКЛЯННЫЕ КАРТОЧКИ
+   -------------------------------------------------------------------------- */
+.glass-card {
   position: relative;
-  padding: 0.5rem 0;
-  transition: all 0.3s ease;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  padding: var(--space-md);
+  overflow: hidden;
+  transition: transform var(--transition-base),
+              box-shadow var(--transition-base),
+              border-color var(--transition-base);
 }
 
-.nav-item::after {
+/* Тонкая золотая линия-блик сверху карточки */
+.glass-card::before {
   content: '';
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--gold);
-  transition: width 0.3s ease;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--color-gold-rgb), 0.8), transparent);
 }
 
-.nav-item:hover {
-  color: var(--gold);
-  text-shadow: 0 0 20px var(--gold);
+.glass-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(var(--color-gold-rgb), 0.5);
+  box-shadow: var(--shadow-card), var(--shadow-gold-glow);
 }
 
-.nav-item:hover::after {
-  width: 100%;
+/* Более насыщенный вариант стекла (для модалок/важных блоков) */
+.glass-card--strong {
+  background: var(--glass-bg-strong);
+  border-color: rgba(var(--color-gold-rgb), 0.35);
 }
 
-/* === ГЕРОЙ СЕКЦИЯ === */
-.hero {
-  height: 100vh;
-  display: flex;
+/* --------------------------------------------------------------------------
+   6. КНОПКИ
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Анимированные карты на фоне */
-.hero::before {
-  content: '♠ ♥ ♣ ♦';
-  position: absolute;
-  font-size: 15rem;
-  color: rgba(212,175,55,0.03);
-  animation: floatingCards 20s linear infinite;
-  white-space: nowrap;
-}
-
-@keyframes floatingCards {
-  0% { transform: translateX(100%) rotate(10deg); }
-  100% { transform: translateX(-100%) rotate(-10deg); }
-}
-
-.hero-content {
-  z-index: 2;
-  max-width: 800px;
-}
-
-.hero-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 5rem;
-  font-weight: 900;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-  background: linear-gradient(180deg, var(--white) 0%, var(--gold) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: titleGlow 3s ease-in-out infinite;
-}
-
-@keyframes titleGlow {
-  0%, 100% { text-shadow: 0 0 20px var(--gold); }
-  50% { text-shadow: 0 0 40px var(--gold), 0 0 80px var(--gold); }
-}
-
-.hero-subtitle {
-  font-size: 1.5rem;
-  color: var(--gold-light);
-  margin-bottom: 2rem;
-  font-weight: 300;
-  letter-spacing: 5px;
-  animation: fadeInUp 1s ease 0.5s both;
-}
-
-/* === КНОПКИ === */
-.btn {
-  display: inline-block;
-  padding: 1.2rem 3rem;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 1.1rem;
+  gap: var(--space-xs);
+  padding: 14px 32px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
   border: none;
-  cursor: pointer;
-  transition: all 0.4s ease;
-  text-decoration: none;
   position: relative;
   overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-base);
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-  color: var(--black);
-  border-radius: 5px;
-  box-shadow: 0 10px 30px rgba(212,175,55,0.3);
+.btn-gold {
+  background: var(--gradient-gold);
+  color: var(--color-bg-black);
+  box-shadow: var(--shadow-gold-glow);
 }
 
-.btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(212,175,55,0.5);
+.btn-gold:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 30px rgba(var(--color-gold-rgb), 0.6), 0 0 60px rgba(var(--color-gold-rgb), 0.25);
 }
 
-.btn-primary:active {
-  transform: translateY(-1px);
+.btn-gold:active {
+  transform: translateY(0) scale(0.98);
 }
 
-/* Эффект блика */
-.btn::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-  transform: rotate(45deg);
-  transition: 0.5s;
-  animation: btnShine 3s infinite;
-}
-
-@keyframes btnShine {
-  0% { transform: translateX(-100%) rotate(45deg); }
-  20%, 100% { transform: translateX(100%) rotate(45deg); }
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--gold);
-  border: 2px solid var(--gold);
-  border-radius: 5px;
-}
-
-.btn-secondary:hover {
-  background: var(--gold);
-  color: var(--black);
-  box-shadow: 0 0 30px var(--gold);
-}
-
-/* === КАРТОЧКИ ИГР === */
-.games-section {
-  padding: 5rem 2rem;
-  position: relative;
-}
-
-.section-title {
-  font-family: 'Cinzel', serif;
-  font-size: 3rem;
-  text-align: center;
-  margin-bottom: 3rem;
-  color: var(--gold);
-  text-shadow: 0 0 30px rgba(212,175,55,0.5);
-  position: relative;
-  letter-spacing: 5px;
-}
-
-.section-title::after {
-  content: '';
-  display: block;
-  width: 100px;
-  height: 3px;
-  background: var(--gold);
-  margin: 1rem auto;
-  animation: widenLine 2s ease-in-out infinite;
-}
-
-@keyframes widenLine {
-  0%, 100% { width: 100px; }
-  50% { width: 200px; }
-}
-
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.game-card {
-  background: var(--card-bg);
-  border: 1px solid rgba(212,175,55,0.2);
-  border-radius: 15px;
-  overflow: hidden;
-  transition: all 0.5s ease;
-  cursor: pointer;
-  position: relative;
-  backdrop-filter: blur(10px);
-}
-
-.game-card:hover {
-  transform: translateY(-10px) scale(1.02);
-  border-color: var(--gold);
-  box-shadow: 
-    0 20px 40px rgba(0,0,0,0.3),
-    0 0 30px rgba(212,175,55,0.3),
-    0 0 60px rgba(212,175,55,0.1);
-}
-
-.game-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, var(--black) 0%, transparent 50%);
-  z-index: 1;
-}
-
-.card-image {
-  width: 100%;
-  height: 250px;
-  background: linear-gradient(135deg, #1a0a2e, #2a1a3e);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Анимированные фигуры на карте */
-.card-image::after {
-  content: '🎰';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 5rem;
-  animation: slotSpin 3s ease-in-out infinite;
-}
-
-@keyframes slotSpin {
-  0% { transform: translate(-50%, -50%) rotateY(0deg); }
-  50% { transform: translate(-50%, -50%) rotateY(180deg); }
-  100% { transform: translate(-50%, -50%) rotateY(360deg); }
-}
-
-.card-content {
-  padding: 1.5rem;
-  position: relative;
-  z-index: 2;
-}
-
-.card-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: var(--gold);
-}
-
-.card-description {
-  color: rgba(255,255,255,0.7);
-  font-weight: 300;
-  line-height: 1.6;
-}
-
-/* === СЕКЦИЯ ДЖЕКПОТА === */
-.jackpot {
-  background: linear-gradient(135deg, #1a0a2e, #0a0a0a);
-  border: 2px solid var(--gold);
-  margin: 3rem auto;
-  max-width: 800px;
-  padding: 2rem;
-  border-radius: 20px;
-  text-align: center;
-  animation: jackpotPulse 2s ease-in-out infinite;
-}
-
-@keyframes jackpotPulse {
-  0%, 100% { 
-    box-shadow: 0 0 50px rgba(212,175,55,0.3);
-  }
-  50% { 
-    box-shadow: 0 0 100px rgba(212,175,55,0.6);
-  }
-}
-
-.jackpot-amount {
-  font-family: 'Cinzel', serif;
-  font-size: 4rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: countUp 2s ease-out;
-}
-
-/* === ФУТЕР === */
-.footer {
-  background: var(--black);
-  border-top: 3px solid var(--gold);
-  padding: 3rem 2rem;
-  position: relative;
-}
-
-.footer::before {
+/* Блик, пробегающий по кнопке при наведении */
+.btn-gold::after {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: -75%;
+  width: 50%;
   height: 100%;
-  background: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(212,175,55,0.03) 2px,
-      rgba(212,175,55,0.03) 4px
-    );
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
 }
 
-/* === СКРОЛЛБАР === */
-::-webkit-scrollbar {
-  width: 10px;
+.btn-gold:hover::after {
+  left: 125%;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--black);
+.btn-outline {
+  background: transparent;
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold);
 }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--gold), var(--gold-dark));
-  border-radius: 5px;
+.btn-outline:hover {
+  background: rgba(var(--color-gold-rgb), 0.1);
+  box-shadow: var(--shadow-gold-glow);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+/* --------------------------------------------------------------------------
+   7. ГРАДИЕНТНЫЙ ТЕКСТ И НЕОНОВЫЕ ЭФФЕКТЫ
+   -------------------------------------------------------------------------- */
+.text-gradient-gold {
+  background: var(--gradient-gold-text);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shineText 6s linear infinite;
 }
 
-/* === МЕДИА-ЗАПРОСЫ === */
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 3rem;
-  }
-  
-  .nav {
-    gap: 1rem;
-  }
-  
-  .header {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .games-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .section-title {
-    font-size: 2rem;
-  }
-} /* <-- ЭТА СКОБКА БЫЛА ПРОПУЩЕНА! */
+@keyframes shineText {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
 
-/* === АНИМАЦИИ ПРИ ЗАГРУЗКЕ === */
+/* Неоновое свечение текста (например, для заголовков "JACKPOT") */
+.text-neon {
+  color: var(--color-gold-light);
+  text-shadow:
+    0 0 5px rgba(var(--color-gold-rgb), 0.8),
+    0 0 15px rgba(var(--color-gold-rgb), 0.6),
+    0 0 30px rgba(var(--color-gold-rgb), 0.4),
+    0 0 60px rgba(var(--color-violet-rgb), 0.3);
+  animation: neonPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.75; }
+}
+
+/* Неоновая рамка-контур (для баннеров/бейджей) */
+.neon-border {
+  border: 1px solid var(--color-gold);
+  box-shadow:
+    inset 0 0 8px rgba(var(--color-gold-rgb), 0.4),
+    0 0 8px rgba(var(--color-gold-rgb), 0.4),
+    0 0 20px rgba(var(--color-violet-rgb), 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   8. АНИМАЦИИ ЗАГРУЗКИ
+   -------------------------------------------------------------------------- */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(50px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -527,42 +396,230 @@ body::before {
   }
 }
 
-.fade-in-up {
-  animation: fadeInUp 0.8s ease both;
+.animate-fade-in-up {
+  animation: fadeInUp var(--transition-slow) both;
 }
 
-/* === ЭФФЕКТЫ ПРИ НАВЕДЕНИИ === */
-.hover-gold {
-  transition: all 0.3s ease;
+/* Утилита для последовательной анимации списков карточек */
+.stagger > * {
+  opacity: 0;
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.15s; }
+.stagger > *:nth-child(3) { animation-delay: 0.25s; }
+.stagger > *:nth-child(4) { animation-delay: 0.35s; }
+.stagger > *:nth-child(5) { animation-delay: 0.45s; }
+.stagger > *:nth-child(6) { animation-delay: 0.55s; }
+
+/* Простой прелоадер с золотым кольцом */
+.loader {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-round);
+  border: 3px solid rgba(var(--color-gold-rgb), 0.2);
+  border-top-color: var(--color-gold);
+  animation: spin 0.9s linear infinite;
 }
 
-.hover-gold:hover {
-  color: var(--gold) !important;
-  filter: drop-shadow(0 0 10px var(--gold));
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-/* Анимированная полоса загрузки */
-.loading-bar {
-  position: fixed;
+/* --------------------------------------------------------------------------
+   9. КАСТОМНЫЙ СКРОЛЛБАР
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-purple-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-gold);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-bg-purple-deep);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-light);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold) var(--color-bg-purple-deep);
+}
+
+/* --------------------------------------------------------------------------
+   10. ШАПКА / НАВИГАЦИЯ (пример использования переменных)
+   -------------------------------------------------------------------------- */
+.header {
+  position: sticky;
   top: 0;
+  z-index: var(--z-header);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-lg);
+  background: rgba(8, 6, 12, 0.6);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.nav-list {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.nav-link {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
   left: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  animation: loading 2s ease-in-out infinite;
-  z-index: 9999;
+  bottom: -6px;
+  width: 0;
+  height: 1px;
+  background: var(--color-gold);
+  transition: width var(--transition-base);
 }
 
-@keyframes loading {
-  0% { width: 0%; left: 0; }
-  50% { width: 100%; left: 0; }
-  100% { width: 0%; left: 100%; }
+.nav-link:hover {
+  color: var(--color-gold-light);
 }
 
-/* Текст с эффектом неона для кнопок */
-.neon-text {
-  text-shadow: 
-    0 0 5px var(--gold),
-    0 0 10px var(--gold),
-    0 0 20px var(--gold),
-    0 0 40px var(--gold-dark);
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   11. КАРТОЧКА ИГРЫ (пример прикладного компонента)
+   -------------------------------------------------------------------------- */
+.game-card {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.game-card img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.game-card:hover img {
+  transform: scale(1.08);
+}
+
+.game-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(8, 6, 12, 0.95) 10%, transparent 60%);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-sm);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.game-card:hover .game-card__overlay {
+  opacity: 1;
+}
+
+.game-card__title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-gold-light);
+}
+
+/* --------------------------------------------------------------------------
+   12. АДАПТИВНОСТЬ
+   -------------------------------------------------------------------------- */
+
+/* Планшеты */
+@media (max-width: 1024px) {
+  :root {
+    --space-lg: 32px;
+    --space-xl: 48px;
+  }
+
+  .nav-list {
+    gap: var(--space-sm);
+  }
+}
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+  .header {
+    padding: var(--space-xs) var(--space-sm);
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .nav-list {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-sm);
+  }
+
+  .glass-card {
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+  }
+
+  .btn {
+    width: 100%;
+    padding: 12px 24px;
+  }
+
+  .bg-animated::before,
+  .bg-animated::after {
+    width: 90vw;
+    height: 90vw;
+    filter: blur(60px);
+  }
+}
+
+/* Маленькие мобильные экраны */
+@media (max-width: 420px) {
+  .logo {
+    font-size: 1.25rem;
+  }
+
+  .game-card__title {
+    font-size: 0.95rem;
+  }
+}
+
+/* Уважение к пользователям, отключившим анимации */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
