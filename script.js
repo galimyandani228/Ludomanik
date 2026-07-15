@@ -98,6 +98,71 @@ function renderGame(game) {
 }
 
 // ============================================================
+// ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ СТАВОК
+// ============================================================
+
+function setupBetControls(betDisplayId, betCallback) {
+    let bet = 100;
+    const display = document.getElementById(betDisplayId);
+    
+    // Стандартные кнопки ставок
+    document.querySelectorAll('[data-bet]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const value = parseInt(btn.dataset.bet);
+            if (value > 0) {
+                bet = value;
+                display.textContent = bet;
+                if (betCallback) betCallback(bet);
+            }
+        });
+    });
+    
+    // Кнопка "Своя ставка"
+    document.querySelectorAll('.custom-bet-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = document.querySelector('.custom-bet-input');
+            if (input) {
+                const value = parseInt(input.value);
+                if (value > 0 && value <= 1000000) {
+                    bet = value;
+                    display.textContent = bet;
+                    if (betCallback) betCallback(bet);
+                    input.value = '';
+                } else {
+                    alert('Введите число от 1 до 1 000 000');
+                }
+            }
+        });
+    });
+    
+    // Enter на поле ввода
+    document.querySelectorAll('.custom-bet-input').forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const value = parseInt(input.value);
+                if (value > 0 && value <= 1000000) {
+                    bet = value;
+                    display.textContent = bet;
+                    if (betCallback) betCallback(bet);
+                    input.value = '';
+                }
+            }
+        });
+    });
+    
+    return {
+        getBet: () => bet,
+        setBet: (value) => {
+            if (value > 0) {
+                bet = value;
+                display.textContent = bet;
+                if (betCallback) betCallback(bet);
+            }
+        }
+    };
+}
+
+// ============================================================
 // 💣 МИННОЕ ПОЛЕ
 // ============================================================
 function renderMines() {
@@ -107,10 +172,30 @@ function renderMines() {
             <div class="bet-value" id="minesBet">100</div>
         </div>
         <div class="game-buttons">
+            <button class="btn" data-bet="10">10</button>
+            <button class="btn" data-bet="25">25</button>
             <button class="btn" data-bet="50">50</button>
             <button class="btn" data-bet="100">100</button>
+            <button class="btn" data-bet="250">250</button>
             <button class="btn" data-bet="500">500</button>
             <button class="btn" data-bet="1000">1000</button>
+            <button class="btn" data-bet="5000">5000</button>
+        </div>
+        <div class="game-buttons" style="gap: 6px;">
+            <input type="number" class="custom-bet-input" placeholder="Своя ставка" min="1" max="1000000" style="
+                background: rgba(20,20,40,0.5);
+                border: 1px solid rgba(100,100,200,0.12);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: #b8b8d0;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                width: 60%;
+                max-width: 180px;
+                text-align: center;
+                outline: none;
+            ">
+            <button class="btn btn-primary custom-bet-btn" style="width: 35%; max-width: 120px;">✅</button>
         </div>
         <div class="game-result" id="minesResult">Выбери ставку</div>
         <div class="mines-grid" id="minesGrid"></div>
@@ -128,13 +213,9 @@ function renderMines() {
     let gameStarted = false;
     let currentMultiplier = 1.0;
     
-    // Выбор ставки
-    document.querySelectorAll('[data-bet]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (gameActive) return;
-            bet = parseInt(btn.dataset.bet);
-            document.getElementById('minesBet').textContent = bet;
-        });
+    // Настройка ставок
+    const betControls = setupBetControls('minesBet', (newBet) => {
+        bet = newBet;
     });
     
     // Старт игры
@@ -233,7 +314,6 @@ function renderMines() {
             cell.textContent = '✅';
             cell.className = 'mines-cell safe';
             
-            // Увеличиваем множитель
             const safeCount = 25 - minePositions.length;
             currentMultiplier = 1.0 + (revealed.length / safeCount) * 1.5;
             
@@ -241,7 +321,6 @@ function renderMines() {
             document.getElementById('minesResult').textContent = `🎯 +${potentialWin.toLocaleString('ru-RU')} 💰 (x${currentMultiplier.toFixed(2)})`;
             document.getElementById('minesResult').className = 'game-result';
             
-            // Проверка победы
             if (revealed.length === safeCount) {
                 gameActive = false;
                 const win = Math.round(bet * currentMultiplier);
@@ -280,10 +359,30 @@ function renderRoulette() {
             <div class="bet-value" id="rouletteBet">100</div>
         </div>
         <div class="game-buttons">
+            <button class="btn" data-bet="10">10</button>
+            <button class="btn" data-bet="25">25</button>
             <button class="btn" data-bet="50">50</button>
             <button class="btn" data-bet="100">100</button>
+            <button class="btn" data-bet="250">250</button>
             <button class="btn" data-bet="500">500</button>
             <button class="btn" data-bet="1000">1000</button>
+            <button class="btn" data-bet="5000">5000</button>
+        </div>
+        <div class="game-buttons" style="gap: 6px;">
+            <input type="number" class="custom-bet-input" placeholder="Своя ставка" min="1" max="1000000" style="
+                background: rgba(20,20,40,0.5);
+                border: 1px solid rgba(100,100,200,0.12);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: #b8b8d0;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                width: 60%;
+                max-width: 180px;
+                text-align: center;
+                outline: none;
+            ">
+            <button class="btn btn-primary custom-bet-btn" style="width: 35%; max-width: 120px;">✅</button>
         </div>
         <div class="roulette-number" id="rouletteNumber">🎡</div>
         <div class="game-buttons">
@@ -304,12 +403,9 @@ function renderRoulette() {
     let bet = 100;
     let spinning = false;
     
-    document.querySelectorAll('[data-bet]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (spinning) return;
-            bet = parseInt(btn.dataset.bet);
-            document.getElementById('rouletteBet').textContent = bet;
-        });
+    // Настройка ставок
+    const betControls = setupBetControls('rouletteBet', (newBet) => {
+        bet = newBet;
     });
     
     document.querySelectorAll('[data-type]').forEach(btn => {
@@ -390,10 +486,30 @@ function renderSlots() {
             <div class="bet-value" id="slotsBet">100</div>
         </div>
         <div class="game-buttons">
+            <button class="btn" data-bet="10">10</button>
+            <button class="btn" data-bet="25">25</button>
             <button class="btn" data-bet="50">50</button>
             <button class="btn" data-bet="100">100</button>
+            <button class="btn" data-bet="250">250</button>
             <button class="btn" data-bet="500">500</button>
             <button class="btn" data-bet="1000">1000</button>
+            <button class="btn" data-bet="5000">5000</button>
+        </div>
+        <div class="game-buttons" style="gap: 6px;">
+            <input type="number" class="custom-bet-input" placeholder="Своя ставка" min="1" max="1000000" style="
+                background: rgba(20,20,40,0.5);
+                border: 1px solid rgba(100,100,200,0.12);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: #b8b8d0;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                width: 60%;
+                max-width: 180px;
+                text-align: center;
+                outline: none;
+            ">
+            <button class="btn btn-primary custom-bet-btn" style="width: 35%; max-width: 120px;">✅</button>
         </div>
         <div class="slots-display" id="slotsDisplay">🍒 🍋 🍊</div>
         <button class="btn btn-primary" id="slotsSpin">🎰 КРУТИТЬ</button>
@@ -404,12 +520,9 @@ function renderSlots() {
     let bet = 100;
     let spinning = false;
     
-    document.querySelectorAll('[data-bet]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (spinning) return;
-            bet = parseInt(btn.dataset.bet);
-            document.getElementById('slotsBet').textContent = bet;
-        });
+    // Настройка ставок
+    const betControls = setupBetControls('slotsBet', (newBet) => {
+        bet = newBet;
     });
     
     document.getElementById('slotsSpin').addEventListener('click', async () => {
@@ -485,10 +598,30 @@ function renderDice() {
             <div class="bet-value" id="diceBet">100</div>
         </div>
         <div class="game-buttons">
+            <button class="btn" data-bet="10">10</button>
+            <button class="btn" data-bet="25">25</button>
             <button class="btn" data-bet="50">50</button>
             <button class="btn" data-bet="100">100</button>
+            <button class="btn" data-bet="250">250</button>
             <button class="btn" data-bet="500">500</button>
             <button class="btn" data-bet="1000">1000</button>
+            <button class="btn" data-bet="5000">5000</button>
+        </div>
+        <div class="game-buttons" style="gap: 6px;">
+            <input type="number" class="custom-bet-input" placeholder="Своя ставка" min="1" max="1000000" style="
+                background: rgba(20,20,40,0.5);
+                border: 1px solid rgba(100,100,200,0.12);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: #b8b8d0;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                width: 60%;
+                max-width: 180px;
+                text-align: center;
+                outline: none;
+            ">
+            <button class="btn btn-primary custom-bet-btn" style="width: 35%; max-width: 120px;">✅</button>
         </div>
         <div class="dice-display" id="diceDisplay">🎲</div>
         <div class="game-buttons">
@@ -510,12 +643,9 @@ function renderDice() {
     let bet = 100;
     let rolling = false;
     
-    document.querySelectorAll('[data-bet]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (rolling) return;
-            bet = parseInt(btn.dataset.bet);
-            document.getElementById('diceBet').textContent = bet;
-        });
+    // Настройка ставок
+    const betControls = setupBetControls('diceBet', (newBet) => {
+        bet = newBet;
     });
     
     document.querySelectorAll('[data-choice]').forEach(btn => {
@@ -582,10 +712,30 @@ function renderCoin() {
             <div class="bet-value" id="coinBet">100</div>
         </div>
         <div class="game-buttons">
+            <button class="btn" data-bet="10">10</button>
+            <button class="btn" data-bet="25">25</button>
             <button class="btn" data-bet="50">50</button>
             <button class="btn" data-bet="100">100</button>
+            <button class="btn" data-bet="250">250</button>
             <button class="btn" data-bet="500">500</button>
             <button class="btn" data-bet="1000">1000</button>
+            <button class="btn" data-bet="5000">5000</button>
+        </div>
+        <div class="game-buttons" style="gap: 6px;">
+            <input type="number" class="custom-bet-input" placeholder="Своя ставка" min="1" max="1000000" style="
+                background: rgba(20,20,40,0.5);
+                border: 1px solid rgba(100,100,200,0.12);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: #b8b8d0;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                width: 60%;
+                max-width: 180px;
+                text-align: center;
+                outline: none;
+            ">
+            <button class="btn btn-primary custom-bet-btn" style="width: 35%; max-width: 120px;">✅</button>
         </div>
         <div class="coin-display" id="coinDisplay">🪙</div>
         <div class="game-buttons">
@@ -599,12 +749,9 @@ function renderCoin() {
     let bet = 100;
     let flipping = false;
     
-    document.querySelectorAll('[data-bet]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (flipping) return;
-            bet = parseInt(btn.dataset.bet);
-            document.getElementById('coinBet').textContent = bet;
-        });
+    // Настройка ставок
+    const betControls = setupBetControls('coinBet', (newBet) => {
+        bet = newBet;
     });
     
     document.querySelectorAll('[data-choice]').forEach(btn => {
