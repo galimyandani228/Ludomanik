@@ -1,625 +1,1567 @@
-/* ==========================================================================
-   CASINO PREMIUM THEME
-   Темная тема с фиолетовым оттенком и золотыми акцентами
-   Шрифты: Playfair Display, Cinzel, Montserrat (Google Fonts)
-   ========================================================================== */
+/* ===== ИМПОРТ ШРИФТОВ ===== */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600;700&display=swap');
 
-/* --------------------------------------------------------------------------
-   1. ПОДКЛЮЧЕНИЕ ШРИФТОВ
-   -------------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,600&family=Cinzel:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap');
-
-/* --------------------------------------------------------------------------
-   2. CSS-ПЕРЕМЕННЫЕ (ДИЗАЙН-ТОКЕНЫ)
-   -------------------------------------------------------------------------- */
+/* ===== CSS ПЕРЕМЕННЫЕ ===== */
 :root {
-  /* --- Базовые цвета фона --- */
-  --color-bg-black: #08060c;
-  --color-bg-purple-deep: #120a1e;
-  --color-bg-purple: #1a0f2e;
-  --color-bg-purple-light: #241539;
-
-  /* --- Золотой акцент --- */
-  --color-gold: #D4AF37;
-  --color-gold-light: #F4E5B2;
-  --color-gold-dark: #9c7f24;
-  --color-gold-rgb: 212, 175, 55;
-
-  /* --- Фиолетовый акцент (для свечений и градиентов) --- */
-  --color-violet: #7b2ff7;
-  --color-violet-light: #a855f7;
-  --color-violet-rgb: 123, 47, 247;
-
-  /* --- Текст --- */
-  --color-text-primary: #f5f0e6;
-  --color-text-secondary: #b8aec4;
-  --color-text-muted: #6f6580;
-
-  /* --- Градиенты --- */
-  --gradient-bg-main: radial-gradient(ellipse at top, var(--color-bg-purple) 0%, var(--color-bg-black) 60%);
-  --gradient-gold: linear-gradient(135deg, var(--color-gold-dark) 0%, var(--color-gold) 45%, var(--color-gold-light) 55%, var(--color-gold) 100%);
-  --gradient-gold-text: linear-gradient(90deg, #b8860b, #ffe9a8, #D4AF37, #ffdf80);
-  --gradient-glow: radial-gradient(circle, rgba(var(--color-gold-rgb), 0.25) 0%, rgba(var(--color-violet-rgb), 0.15) 45%, transparent 70%);
-
-  /* --- Glassmorphism --- */
-  --glass-bg: rgba(30, 18, 48, 0.45);
-  --glass-bg-strong: rgba(36, 21, 57, 0.65);
-  --glass-border: rgba(var(--color-gold-rgb), 0.25);
-  --glass-blur: 16px;
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
-
-  /* --- Тени и свечения --- */
-  --shadow-gold-glow: 0 0 20px rgba(var(--color-gold-rgb), 0.35), 0 0 40px rgba(var(--color-gold-rgb), 0.15);
-  --shadow-violet-glow: 0 0 25px rgba(var(--color-violet-rgb), 0.4), 0 0 50px rgba(var(--color-violet-rgb), 0.2);
-  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.5);
-
-  /* --- Шрифты --- */
-  --font-display: 'Playfair Display', serif;
-  --font-heading: 'Cinzel', serif;
-  --font-body: 'Montserrat', sans-serif;
-
-  /* --- Радиусы --- */
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 24px;
-  --radius-round: 50%;
-
-  /* --- Переходы --- */
-  --transition-fast: 0.2s ease;
-  --transition-base: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* --- Отступы (базовая сетка) --- */
-  --space-xs: 8px;
-  --space-sm: 16px;
-  --space-md: 24px;
-  --space-lg: 40px;
-  --space-xl: 64px;
-
-  /* --- Z-индексы --- */
-  --z-bg: -1;
-  --z-content: 1;
-  --z-header: 10;
-  --z-modal: 100;
+    --color-bg-primary: #050505;
+    --color-bg-secondary: #0a0a14;
+    --color-card-bg: rgba(20, 15, 30, 0.85);
+    --color-gold: #FFD700;
+    --color-gold-old: #C0A060;
+    --color-neon-orange: #FF6B35;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #B8B8D0;
+    --color-text-tertiary: #8888AA;
+    --color-error: #FF0040;
+    --color-success: #00FF88;
+    --font-hitech: 'Orbitron', sans-serif;
+    --font-elegant: 'Playfair Display', serif;
+    --font-body: 'Montserrat', sans-serif;
+    --blur-glass: blur(20px);
+    --shadow-gold: 0 0 30px rgba(255, 215, 0, 0.6);
+    --shadow-neon: 0 0 40px rgba(255, 107, 53, 0.5);
+    --mouse-x: 0;
+    --mouse-y: 0;
 }
 
-/* --------------------------------------------------------------------------
-   3. СБРОС СТИЛЕЙ И БАЗОВЫЕ НАСТРОЙКИ
-   -------------------------------------------------------------------------- */
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-  min-height: 100vh;
-  background-color: var(--color-bg-black);
-  background-image: var(--gradient-bg-main);
-  color: var(--color-text-primary);
-  font-family: var(--font-body);
-  line-height: 1.6;
-  overflow-x: hidden;
-  position: relative;
+    font-family: var(--font-body);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+/* ===== АНИМИРОВАННЫЙ ФОН (СЕТКА, ЧАСТИЦЫ, СВЕЧЕНИЯ) ===== */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(0deg, transparent 24%, rgba(255, 215, 0, 0.05) 25%, rgba(255, 215, 0, 0.05) 26%, transparent 27%, transparent 74%, rgba(255, 215, 0, 0.05) 75%, rgba(255, 215, 0, 0.05) 76%, transparent 77%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(255, 215, 0, 0.05) 25%, rgba(255, 215, 0, 0.05) 26%, transparent 27%, transparent 74%, rgba(255, 215, 0, 0.05) 75%, rgba(255, 215, 0, 0.05) 76%, transparent 77%, transparent);
+    background-size: 50px 50px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+    transform: translate(calc(var(--mouse-x) * -0.02px), calc(var(--mouse-y) * -0.02px));
+    transition: transform 0.3s ease-out;
 }
 
-/* Типографика */
-h1, h2, h3, h4 {
-  font-family: var(--font-heading);
-  letter-spacing: 0.03em;
-  font-weight: 600;
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(192, 160, 96, 0.05) 0%, transparent 70%);
+    animation: glowPulse 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 2;
 }
 
-.font-display {
-  font-family: var(--font-display);
+@keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
 }
 
-ul, ol {
-  list-style: none;
+/* ===== ПАДАЮЩИЕ КАРТЫ НА ФОНЕ ===== */
+.falling-cards {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+    overflow: hidden;
 }
 
-img {
-  max-width: 100%;
-  display: block;
+.falling-card {
+    position: absolute;
+    font-size: 80px;
+    opacity: 0.03;
+    color: var(--color-gold);
+    animation: cardFall linear infinite;
+    transform: translate(calc(var(--mouse-x) * -0.015px), calc(var(--mouse-y) * -0.015px));
+    transition: transform 0.3s ease-out;
 }
 
-/* --------------------------------------------------------------------------
-   4. АНИМИРОВАННЫЙ ФОН: ЧАСТИЦЫ И ГРАДИЕНТНЫЕ СВЕЧЕНИЯ
-   -------------------------------------------------------------------------- */
+.falling-card:nth-child(1) { left: 10%; animation-duration: 15s; animation-delay: 0s; font-size: 100px; }
+.falling-card:nth-child(2) { left: 25%; animation-duration: 18s; animation-delay: 2s; font-size: 70px; }
+.falling-card:nth-child(3) { left: 40%; animation-duration: 20s; animation-delay: 4s; font-size: 90px; }
+.falling-card:nth-child(4) { left: 55%; animation-duration: 16s; animation-delay: 1s; font-size: 60px; }
+.falling-card:nth-child(5) { left: 70%; animation-duration: 22s; animation-delay: 3s; font-size: 85px; }
+.falling-card:nth-child(6) { left: 85%; animation-duration: 17s; animation-delay: 5s; font-size: 75px; }
 
-/* Контейнер фона — располагается фиксированно позади всего контента */
-.bg-animated {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-bg);
-  overflow: hidden;
-  background: var(--color-bg-black);
+@keyframes cardFall {
+    0% {
+        top: -10%;
+        transform: rotate(0deg) translateX(0);
+    }
+    50% {
+        transform: rotate(180deg) translateX(30px);
+    }
+    100% {
+        top: 110%;
+        transform: rotate(360deg) translateX(0);
+    }
 }
 
-/* Пульсирующие цветовые пятна (ambient glow) */
-.bg-animated::before,
-.bg-animated::after {
-  content: '';
-  position: absolute;
-  width: 60vw;
-  height: 60vw;
-  border-radius: var(--radius-round);
-  filter: blur(90px);
-  opacity: 0.5;
-  animation: floatGlow 18s ease-in-out infinite alternate;
-}
-
-.bg-animated::before {
-  top: -10%;
-  left: -10%;
-  background: radial-gradient(circle, rgba(var(--color-violet-rgb), 0.5), transparent 70%);
-}
-
-.bg-animated::after {
-  bottom: -15%;
-  right: -10%;
-  background: radial-gradient(circle, rgba(var(--color-gold-rgb), 0.35), transparent 70%);
-  animation-delay: 4s;
-}
-
-@keyframes floatGlow {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(5%, 8%) scale(1.15);
-  }
-  100% {
-    transform: translate(-5%, -4%) scale(0.95);
-  }
-}
-
-/* Частицы — плавающие золотые точки. Каждый .particle позиционируется
-   через inline-style (--x, --y, --delay, --duration) либо через nth-child */
+/* ===== ЗОЛОТЫЕ ЧАСТИЦЫ ===== */
 .particles {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 4;
 }
 
 .particle {
-  position: absolute;
-  bottom: -10px;
-  width: var(--size, 4px);
-  height: var(--size, 4px);
-  left: var(--x, 50%);
-  background: var(--color-gold-light);
-  border-radius: var(--radius-round);
-  box-shadow: 0 0 6px 2px rgba(var(--color-gold-rgb), 0.6);
-  opacity: 0;
-  animation: particleRise var(--duration, 12s) linear infinite;
-  animation-delay: var(--delay, 0s);
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--color-gold);
+    border-radius: 50%;
+    filter: blur(1px);
+    box-shadow: 0 0 10px var(--color-gold);
+    animation: particleFloat linear infinite;
 }
 
-@keyframes particleRise {
-  0% {
-    transform: translateY(0) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.9;
-  }
-  90% {
-    opacity: 0.4;
-  }
-  100% {
-    transform: translateY(-110vh) translateX(20px);
-    opacity: 0;
-  }
+.particle:nth-child(1) { left: 15%; animation-duration: 8s; animation-delay: 0s; }
+.particle:nth-child(2) { left: 35%; animation-duration: 10s; animation-delay: 1s; }
+.particle:nth-child(3) { left: 55%; animation-duration: 12s; animation-delay: 2s; }
+.particle:nth-child(4) { left: 75%; animation-duration: 9s; animation-delay: 3s; }
+.particle:nth-child(5) { left: 90%; animation-duration: 11s; animation-delay: 4s; }
+
+@keyframes particleFloat {
+    0% {
+        top: 100%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        top: -10%;
+        opacity: 0;
+    }
 }
 
-/* Пример автогенерации частиц через nth-child (если нет JS) */
-.particle:nth-child(1) { --x: 5%;  --size: 3px; --duration: 14s; --delay: 0s; }
-.particle:nth-child(2) { --x: 15%; --size: 5px; --duration: 18s; --delay: 2s; }
-.particle:nth-child(3) { --x: 25%; --size: 2px; --duration: 10s; --delay: 1s; }
-.particle:nth-child(4) { --x: 40%; --size: 4px; --duration: 16s; --delay: 3s; }
-.particle:nth-child(5) { --x: 55%; --size: 3px; --duration: 12s; --delay: 0.5s; }
-.particle:nth-child(6) { --x: 68%; --size: 6px; --duration: 20s; --delay: 4s; }
-.particle:nth-child(7) { --x: 78%; --size: 2px; --duration: 9s;  --delay: 2.5s; }
-.particle:nth-child(8) { --x: 90%; --size: 4px; --duration: 15s; --delay: 1.5s; }
-
-/* --------------------------------------------------------------------------
-   5. GLASSMORPHISM — СТЕКЛЯННЫЕ КАРТОЧКИ
-   -------------------------------------------------------------------------- */
-.glass-card {
-  position: relative;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow);
-  padding: var(--space-md);
-  overflow: hidden;
-  transition: transform var(--transition-base),
-              box-shadow var(--transition-base),
-              border-color var(--transition-base);
+/* ===== НЕОНОВЫЕ ПОЛОСЫ ПО КРАЯМ ===== */
+.neon-strip-left,
+.neon-strip-right {
+    position: fixed;
+    width: 2px;
+    height: 100%;
+    top: 0;
+    pointer-events: none;
+    z-index: 5;
+    animation: neonPulse 3s ease-in-out infinite;
 }
 
-/* Тонкая золотая линия-блик сверху карточки */
-.glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--color-gold-rgb), 0.8), transparent);
+.neon-strip-left {
+    left: 0;
+    background: linear-gradient(180deg, transparent, var(--color-gold), var(--color-neon-orange), transparent);
 }
 
-.glass-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(var(--color-gold-rgb), 0.5);
-  box-shadow: var(--shadow-card), var(--shadow-gold-glow);
-}
-
-/* Более насыщенный вариант стекла (для модалок/важных блоков) */
-.glass-card--strong {
-  background: var(--glass-bg-strong);
-  border-color: rgba(var(--color-gold-rgb), 0.35);
-}
-
-/* --------------------------------------------------------------------------
-   6. КНОПКИ
-   -------------------------------------------------------------------------- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-  padding: 14px 32px;
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  border: none;
-  position: relative;
-  overflow: hidden;
-  transition: transform var(--transition-fast), box-shadow var(--transition-base);
-}
-
-.btn-gold {
-  background: var(--gradient-gold);
-  color: var(--color-bg-black);
-  box-shadow: var(--shadow-gold-glow);
-}
-
-.btn-gold:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 0 30px rgba(var(--color-gold-rgb), 0.6), 0 0 60px rgba(var(--color-gold-rgb), 0.25);
-}
-
-.btn-gold:active {
-  transform: translateY(0) scale(0.98);
-}
-
-/* Блик, пробегающий по кнопке при наведении */
-.btn-gold::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-  transform: skewX(-20deg);
-  transition: left 0.6s ease;
-}
-
-.btn-gold:hover::after {
-  left: 125%;
-}
-
-.btn-outline {
-  background: transparent;
-  color: var(--color-gold);
-  border: 1px solid var(--color-gold);
-}
-
-.btn-outline:hover {
-  background: rgba(var(--color-gold-rgb), 0.1);
-  box-shadow: var(--shadow-gold-glow);
-}
-
-/* --------------------------------------------------------------------------
-   7. ГРАДИЕНТНЫЙ ТЕКСТ И НЕОНОВЫЕ ЭФФЕКТЫ
-   -------------------------------------------------------------------------- */
-.text-gradient-gold {
-  background: var(--gradient-gold-text);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shineText 6s linear infinite;
-}
-
-@keyframes shineText {
-  0%   { background-position: 0% center; }
-  100% { background-position: 200% center; }
-}
-
-/* Неоновое свечение текста (например, для заголовков "JACKPOT") */
-.text-neon {
-  color: var(--color-gold-light);
-  text-shadow:
-    0 0 5px rgba(var(--color-gold-rgb), 0.8),
-    0 0 15px rgba(var(--color-gold-rgb), 0.6),
-    0 0 30px rgba(var(--color-gold-rgb), 0.4),
-    0 0 60px rgba(var(--color-violet-rgb), 0.3);
-  animation: neonPulse 2.5s ease-in-out infinite;
+.neon-strip-right {
+    right: 0;
+    background: linear-gradient(180deg, transparent, var(--color-neon-orange), var(--color-gold), transparent);
+    animation-delay: 1.5s;
 }
 
 @keyframes neonPulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.75; }
+    0%, 100% { opacity: 0.3; box-shadow: 0 0 10px currentColor; }
+    50% { opacity: 1; box-shadow: 0 0 30px currentColor; }
 }
-
-/* Неоновая рамка-контур (для баннеров/бейджей) */
-.neon-border {
-  border: 1px solid var(--color-gold);
-  box-shadow:
-    inset 0 0 8px rgba(var(--color-gold-rgb), 0.4),
-    0 0 8px rgba(var(--color-gold-rgb), 0.4),
-    0 0 20px rgba(var(--color-violet-rgb), 0.25);
-}
-
-/* --------------------------------------------------------------------------
-   8. АНИМАЦИИ ЗАГРУЗКИ
-   -------------------------------------------------------------------------- */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp var(--transition-slow) both;
-}
-
-/* Утилита для последовательной анимации списков карточек */
-.stagger > * {
-  opacity: 0;
-  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-.stagger > *:nth-child(1) { animation-delay: 0.05s; }
-.stagger > *:nth-child(2) { animation-delay: 0.15s; }
-.stagger > *:nth-child(3) { animation-delay: 0.25s; }
-.stagger > *:nth-child(4) { animation-delay: 0.35s; }
-.stagger > *:nth-child(5) { animation-delay: 0.45s; }
-.stagger > *:nth-child(6) { animation-delay: 0.55s; }
-
-/* Простой прелоадер с золотым кольцом */
-.loader {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-round);
-  border: 3px solid rgba(var(--color-gold-rgb), 0.2);
-  border-top-color: var(--color-gold);
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* --------------------------------------------------------------------------
-   9. КАСТОМНЫЙ СКРОЛЛБАР
-   -------------------------------------------------------------------------- */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg-purple-deep);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--gradient-gold);
-  border-radius: var(--radius-sm);
-  border: 2px solid var(--color-bg-purple-deep);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gold-light);
-}
-
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-gold) var(--color-bg-purple-deep);
-}
-
-/* --------------------------------------------------------------------------
-   10. ШАПКА / НАВИГАЦИЯ (пример использования переменных)
-   -------------------------------------------------------------------------- */
+/* ===== ШАПКА (ПРЕМИУМ С ГЛУБОКИМ СТЕКЛОМ) ===== */
 .header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-header);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-sm) var(--space-lg);
-  background: rgba(8, 6, 12, 0.6);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background: rgba(5, 5, 5, 0.7);
+    backdrop-filter: var(--blur-glass);
+    border-bottom: 2px solid var(--color-gold);
+    padding: 1rem;
+    z-index: 100;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.2);
+    transform: translate(calc(var(--mouse-x) * 0.05px), calc(var(--mouse-y) * 0.05px));
+    transition: transform 0.3s ease-out;
+}
+
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), var(--color-neon-orange), var(--color-gold), transparent);
+    animation: headerLineFlow 3s linear infinite;
+}
+
+@keyframes headerLineFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .logo {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 700;
+    font-family: var(--font-elegant);
+    font-size: 1.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--color-gold), var(--color-gold-old), var(--color-gold));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    animation: logoGlow 3s ease-in-out infinite, gradientShift 5s ease infinite;
+    cursor: pointer;
+    transition: transform 0.5s ease;
 }
 
-.nav-list {
-  display: flex;
-  gap: var(--space-md);
+.logo:hover {
+    transform: rotateY(360deg);
 }
 
-.nav-link {
-  position: relative;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-secondary);
-  transition: color var(--transition-fast);
+@keyframes logoGlow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)); }
+    50% { filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)); }
 }
 
-.nav-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 0;
-  height: 1px;
-  background: var(--color-gold);
-  transition: width var(--transition-base);
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
-.nav-link:hover {
-  color: var(--color-gold-light);
+.balance {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 0.5rem 1rem;
+    background: var(--color-card-bg);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 2px 10px rgba(255, 215, 0, 0.1);
 }
 
-.nav-link:hover::after {
-  width: 100%;
+.balance-label {
+    font-size: 0.7rem;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* --------------------------------------------------------------------------
-   11. КАРТОЧКА ИГРЫ (пример прикладного компонента)
-   -------------------------------------------------------------------------- */
-.game-card {
-  position: relative;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  cursor: pointer;
+.balance-amount {
+    font-family: var(--font-hitech);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    animation: balanceGlow 2s ease-in-out infinite;
 }
 
-.game-card img {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  transition: transform var(--transition-slow);
+@keyframes balanceGlow {
+    0%, 100% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+    50% { text-shadow: 0 0 20px rgba(255, 215, 0, 1), 0 0 30px rgba(255, 215, 0, 0.5); }
 }
 
-.game-card:hover img {
-  transform: scale(1.08);
+/* ===== ГЛАВНОЕ МЕНЮ (ПРЕМИУМ) ===== */
+.main-menu {
+    padding: 3rem 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+    transform: translate(calc(var(--mouse-x) * 0.03px), calc(var(--mouse-y) * 0.03px));
+    transition: transform 0.3s ease-out;
 }
 
-.game-card__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(8, 6, 12, 0.95) 10%, transparent 60%);
-  display: flex;
-  align-items: flex-end;
-  padding: var(--space-sm);
-  opacity: 0;
-  transition: opacity var(--transition-base);
+.menu-title {
+    font-family: var(--font-elegant);
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #FFFFFF, var(--color-gold), var(--color-gold-old));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.5));
+    animation: titlePulse 4s ease-in-out infinite;
+    position: relative;
 }
 
-.game-card:hover .game-card__overlay {
-  opacity: 1;
+.menu-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    box-shadow: 0 0 10px var(--color-gold);
 }
 
-.game-card__title {
-  font-family: var(--font-heading);
-  font-size: 1.1rem;
-  color: var(--color-gold-light);
+@keyframes titlePulse {
+    0%, 100% { filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.5)); }
+    50% { filter: drop-shadow(0 0 50px rgba(255, 215, 0, 1)); }
 }
 
-/* --------------------------------------------------------------------------
-   12. АДАПТИВНОСТЬ
-   -------------------------------------------------------------------------- */
-
-/* Планшеты */
-@media (max-width: 1024px) {
-  :root {
-    --space-lg: 32px;
-    --space-xl: 48px;
-  }
-
-  .nav-list {
-    gap: var(--space-sm);
-  }
+.games-menu {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
 }
 
-/* Мобильные устройства */
-@media (max-width: 768px) {
-  .header {
-    padding: var(--space-xs) var(--space-sm);
-    flex-wrap: wrap;
-    gap: var(--space-xs);
-  }
+/* ===== КНОПКИ ИГР (СТЕКЛЯННЫЕ КАРТОЧКИ) ===== */
+.game-btn {
+    background: var(--color-card-bg);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    padding: 2.5rem 1rem;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
 
-  .nav-list {
+.game-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
     width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: var(--space-xs) var(--space-sm);
-  }
-
-  .glass-card {
-    padding: var(--space-sm);
-    border-radius: var(--radius-md);
-  }
-
-  .btn {
-    width: 100%;
-    padding: 12px 24px;
-  }
-
-  .bg-animated::before,
-  .bg-animated::after {
-    width: 90vw;
-    height: 90vw;
-    filter: blur(60px);
-  }
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+    transition: left 0.5s ease;
 }
 
-/* Маленькие мобильные экраны */
-@media (max-width: 420px) {
-  .logo {
-    font-size: 1.25rem;
-  }
+.game-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--color-gold), var(--color-neon-orange));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
 
-  .game-card__title {
+.game-btn:hover {
+    transform: translateY(-10px) scale(1.05);
+    border-color: var(--color-gold);
+    box-shadow: 
+        0 15px 50px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 215, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.game-btn:hover::before {
+    left: 100%;
+}
+
+.game-btn:hover::after {
+    opacity: 1;
+}
+
+.game-btn:active {
+    transform: translateY(-5px) scale(1.02);
+}
+
+.game-icon {
+    font-size: 4.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+    animation: iconFloat 3s ease-in-out infinite;
+    transition: all 0.5s ease;
+}
+
+.game-btn:hover .game-icon {
+    transform: scale(1.2) rotateY(360deg);
+    filter: drop-shadow(0 0 30px rgba(255, 215, 0, 1));
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.game-name {
+    font-family: var(--font-hitech);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+/* ===== ЭКРАН ИГРЫ ===== */
+.game-screen {
+    padding: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+    transform: translate(calc(var(--mouse-x) * 0.03px), calc(var(--mouse-y) * 0.03px));
+    transition: transform 0.3s ease-out;
+}
+
+.game-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.btn-back {
+    background: var(--color-card-bg);
+    border: 2px solid var(--color-gold);
+    color: var(--color-gold);
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-family: var(--font-hitech);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-back::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: var(--color-gold);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+    z-index: -1;
+}
+
+.btn-back:hover {
+    color: var(--color-bg-primary);
+    border-color: var(--color-gold);
+    transform: translateX(-5px);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.btn-back:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+.game-title {
+    font-family: var(--font-elegant);
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--color-gold);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+.game-content {
+    background: var(--color-card-bg);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    backdrop-filter: blur(15px);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.game-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);
+}
+
+/* ===== КОМПОНЕНТ СТАВОК (ПРЕМИУМ) ===== */
+.bet-selector {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(10, 10, 20, 0.6);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.bet-selector h3 {
+    font-family: var(--font-hitech);
+    color: var(--color-gold);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.bet-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.bet-btn {
+    background: rgba(30, 25, 50, 0.8);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    color: var(--color-text-secondary);
+    padding: 0.9rem;
+    border-radius: 10px;
+    font-family: var(--font-body);
     font-size: 0.95rem;
-  }
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Уважение к пользователям, отключившим анимации */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+.bet-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--color-gold), var(--color-gold-old));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.bet-btn:hover {
+    border-color: var(--color-gold);
+    color: var(--color-text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+}
+
+.bet-btn:hover::before {
+    opacity: 0.2;
+}
+
+.bet-btn.active {
+    background: linear-gradient(135deg, var(--color-gold), var(--color-gold-old));
+    color: var(--color-bg-primary);
+    border-color: var(--color-gold);
+    box-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.6),
+        inset 0 2px 5px rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.custom-bet {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+#custom-bet-input {
+    flex: 1;
+    background: rgba(30, 25, 50, 0.8);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    color: var(--color-text-primary);
+    padding: 1rem;
+    border-radius: 10px;
+    font-family: var(--font-hitech);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#custom-bet-input:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+#custom-bet-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+#custom-bet-confirm {
+    background: rgba(30, 25, 50, 0.8);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    color: var(--color-gold);
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#custom-bet-confirm:hover {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: var(--color-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    transform: scale(1.1);
+}
+
+.current-bet {
+    text-align: center;
+    font-family: var(--font-hitech);
+    font-size: 1.2rem;
+    color: var(--color-gold);
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    padding: 0.8rem;
+    background: rgba(255, 215, 0, 0.05);
+    border-radius: 10px;
+}
+
+/* ===== КНОПКИ ДЕЙСТВИЙ (ПРЕМИУМ 3D) ===== */
+.game-action-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-old) 100%);
+    border: none;
+    color: var(--color-bg-primary);
+    padding: 1.2rem;
+    border-radius: 15px;
+    font-family: var(--font-hitech);
+    font-size: 1.3rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 8px 25px rgba(255, 215, 0, 0.4),
+        inset 0 2px 5px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.3);
+    margin-top: 1rem;
+}
+
+.game-action-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 100%;
+    height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    transform: skewX(-25deg);
+    transition: left 0.6s ease;
+}
+
+.game-action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 12px 35px rgba(255, 215, 0, 0.6),
+        0 0 30px rgba(255, 215, 0, 0.4),
+        inset 0 2px 5px rgba(255, 255, 255, 0.4);
+}
+
+.game-action-btn:hover::before {
+    left: 200%;
+}
+
+.game-action-btn:active {
+    transform: translateY(0);
+    box-shadow: 
+        0 5px 15px rgba(255, 215, 0, 0.4),
+        inset 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.game-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.game-action-btn.secondary {
+    background: transparent;
+    border: 3px solid var(--color-gold);
+    color: var(--color-gold);
+    box-shadow: 
+        0 5px 20px rgba(255, 215, 0, 0.2),
+        inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.game-action-btn.secondary:hover {
+    background: rgba(255, 215, 0, 0.15);
+    box-shadow: 
+        0 8px 30px rgba(255, 215, 0, 0.4),
+        0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* ===== УВЕДОМЛЕНИЯ (КИНЕМАТОГРАФИЧНЫЕ) ===== */
+.game-message {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-card-bg);
+    border: 2px solid var(--color-gold);
+    color: var(--color-text-primary);
+    padding: 1.2rem 2.5rem;
+    border-radius: 15px;
+    font-family: var(--font-hitech);
+    font-size: 1.1rem;
+    font-weight: 700;
+    z-index: 1000;
+    backdrop-filter: blur(15px);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(255, 215, 0, 0.5);
+    animation: messageSlideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: opacity 0.3s ease;
+}
+
+.game-message.success {
+    border-color: var(--color-success);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(0, 255, 136, 0.6);
+}
+
+.game-message.error {
+    border-color: var(--color-error);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(255, 0, 64, 0.6);
+}
+
+@keyframes messageSlideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+/* ===== ИГРА: МИННОЕ ПОЛЕ (ПРЕМИУМ) ===== */
+.mines-container {
+    text-align: center;
+}
+
+.mines-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 2rem;
+    font-family: var(--font-hitech);
+    font-size: 1.1rem;
+    color: var(--color-gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.mines-stats div {
+    padding: 0.8rem 1.5rem;
+    background: rgba(30, 25, 50, 0.6);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.mines-stats span {
+    color: var(--color-text-primary);
+    font-weight: 900;
+    font-size: 1.3rem;
+}
+
+.mines-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mines-cell {
+    aspect-ratio: 1;
+    background: rgba(30, 25, 50, 0.8);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.mines-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mines-cell:hover {
+    background: rgba(45, 40, 65, 1);
+    border-color: var(--color-gold);
+    transform: scale(1.08);
+    box-shadow: 
+        0 8px 25px rgba(255, 215, 0, 0.3),
+        0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.mines-cell:hover::before {
+    opacity: 1;
+}
+
+.mines-cell.safe {
+    background: rgba(0, 255, 136, 0.15);
+    border-color: var(--color-success);
+    box-shadow: 
+        0 0 20px rgba(0, 255, 136, 0.4),
+        inset 0 0 15px rgba(0, 255, 136, 0.2);
+    animation: cellSuccess 0.5s ease;
+}
+
+.mines-cell.mine {
+    background: rgba(255, 0, 64, 0.15);
+    border-color: var(--color-error);
+    box-shadow: 
+        0 0 30px rgba(255, 0, 64, 0.6),
+        inset 0 0 20px rgba(255, 0, 64, 0.3);
+    animation: cellExplosion 0.6s ease;
+}
+
+@keyframes cellSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+@keyframes cellExplosion {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.3) rotate(-10deg); }
+    50% { transform: scale(1.3) rotate(10deg); }
+    75% { transform: scale(1.3) rotate(-10deg); }
+}
+
+/* ===== ИГРА: РУЛЕТКА (КИНЕМАТОГРАФИЧНАЯ) ===== */
+.roulette-container {
+    text-align: center;
+}
+
+.roulette-wheel {
+    width: 220px;
+    height: 220px;
+    background: rgba(30, 25, 50, 0.8);
+    border: 5px solid var(--color-gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-hitech);
+    font-size: 4.5rem;
+    font-weight: 900;
+    margin: 2.5rem auto;
+    transition: all 0.4s ease;
+    box-shadow: 
+        0 0 40px rgba(255, 215, 0, 0.4),
+        inset 0 0 30px rgba(0, 0, 0, 0.8),
+        inset 0 2px 10px rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+.roulette-wheel::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        var(--color-gold) 0deg 30deg,
+        transparent 30deg 60deg,
+        var(--color-gold) 60deg 90deg,
+        transparent 90deg 120deg,
+        var(--color-gold) 120deg 150deg,
+        transparent 150deg 180deg,
+        var(--color-gold) 180deg 210deg,
+        transparent 210deg 240deg,
+        var(--color-gold) 240deg 270deg,
+        transparent 270deg 300deg,
+        var(--color-gold) 300deg 330deg,
+        transparent 330deg 360deg
+    );
+    opacity: 0.2;
+    animation: wheelRotate 8s linear infinite;
+    z-index: -1;
+}
+
+@keyframes wheelRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.roulette-wheel.red {
+    border-color: var(--color-error);
+    color: var(--color-error);
+    box-shadow: 
+        0 0 50px rgba(255, 0, 64, 0.6),
+        inset 0 0 30px rgba(255, 0, 64, 0.3);
+    text-shadow: 0 0 20px rgba(255, 0, 64, 1);
+}
+
+.roulette-wheel.black {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+    box-shadow: 
+        0 0 50px rgba(255, 255, 255, 0.6),
+        inset 0 0 30px rgba(255, 255, 255, 0.2);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+}
+
+.roulette-wheel.green {
+    border-color: var(--color-success);
+    color: var(--color-success);
+    box-shadow: 
+        0 0 50px rgba(0, 255, 136, 0.6),
+        inset 0 0 30px rgba(0, 255, 136, 0.3);
+    text-shadow: 0 0 20px rgba(0, 255, 136, 1);
+}
+
+.roulette-bets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.roulette-bet {
+    background: rgba(30, 25, 50, 0.8);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    color: var(--color-text-primary);
+    padding: 1.2rem;
+    border-radius: 12px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.roulette-bet::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: currentColor;
+    opacity: 0.2;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.roulette-bet:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+}
+
+.roulette-bet:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+.roulette-bet.red {
+    border-color: rgba(255, 0, 64, 0.5);
+}
+
+.roulette-bet.red:hover {
+    border-color: var(--color-error);
+    box-shadow: 0 5px 25px rgba(255, 0, 64, 0.4);
+}
+
+.roulette-bet.black {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.roulette-bet.black:hover {
+    border-color: var(--color-text-primary);
+    box-shadow: 0 5px 25px rgba(255, 255, 255, 0.4);
+}
+
+.roulette-bet.green {
+    border-color: rgba(0, 255, 136, 0.5);
+}
+
+.roulette-bet.green:hover {
+    border-color: var(--color-success);
+    box-shadow: 0 5px 25px rgba(0, 255, 136, 0.4);
+}
+
+/* ===== ИГРА: СЛОТЫ (ПРЕМИУМ) ===== */
+.slots-container {
+    text-align: center;
+}
+
+.slots-reels {
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+    margin: 2.5rem 0;
+}
+
+.slots-reel {
+    width: 110px;
+    height: 110px;
+    background: rgba(30, 25, 50, 0.8);
+    border: 4px solid var(--color-gold);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 8px 30px rgba(255, 215, 0, 0.3),
+        inset 0 2px 10px rgba(0, 0, 0, 0.8),
+        inset 0 -2px 10px rgba(255, 215, 0, 0.2);
+    position: relative;
+}
+
+.slots-reel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.1), transparent, rgba(255, 215, 0, 0.1));
+    pointer-events: none;
+}
+
+/* ===== ИГРА: КОСТИ (ПРЕМИУМ) ===== */
+.dice-container {
+    text-align: center;
+}
+
+.dice-display {
+    width: 220px;
+    height: 220px;
+    background: rgba(30, 25, 50, 0.8);
+    border: 5px solid var(--color-gold);
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.5rem;
+    margin: 2.5rem auto;
+    transition: all 0.4s ease;
+    box-shadow: 
+        0 10px 40px rgba(255, 215, 0, 0.4),
+        inset 0 4px 15px rgba(0, 0, 0, 0.8),
+        inset 0 -2px 10px rgba(255, 215, 0, 0.2);
+    position: relative;
+}
+
+.dice-display::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+    pointer-events: none;
+}
+
+.dice-bets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.dice-bet {
+    background: rgba(30, 25, 50, 0.8);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    color: var(--color-text-primary);
+    padding: 1.2rem;
+    border-radius: 12px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dice-bet:hover {
+    border-color: var(--color-gold);
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+}
+
+.dice-bet.small {
+    padding: 1rem;
+    font-size: 0.95rem;
+}
+
+/* ===== ИГРА: МОНЕТКА (КИНЕМАТОГРАФИЧНАЯ) ===== */
+.coin-container {
+    text-align: center;
+}
+
+.coin-display {
+    width: 220px;
+    height: 220px;
+    background: rgba(30, 25, 50, 0.8);
+    border: 5px solid var(--color-gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem;
+    margin: 2.5rem auto;
+    transition: all 0.4s ease;
+    box-shadow: 
+        0 10px 50px rgba(255, 215, 0, 0.5),
+        inset 0 0 30px rgba(0, 0, 0, 0.8),
+        inset 0 2px 10px rgba(255, 255, 255, 0.3);
+    position: relative;
+}
+
+.coin-display::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        var(--color-gold) 0deg,
+        var(--color-gold-old) 90deg,
+        var(--color-gold) 180deg,
+        var(--color-gold-old) 270deg,
+        var(--color-gold) 360deg
+    );
+    opacity: 0.3;
+    animation: coinShine 4s linear infinite;
+    z-index: -1;
+}
+
+@keyframes coinShine {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.coin-bets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+    margin-top: 2rem;
+}
+
+.coin-bet {
+    background: rgba(30, 25, 50, 0.8);
+    border: 3px solid rgba(255, 215, 0, 0.3);
+    color: var(--color-text-primary);
+    padding: 1.8rem;
+    border-radius: 15px;
+    font-family: var(--font-body);
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.coin-bet::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: linear-gradient(135deg, var(--color-gold), var(--color-gold-old));
+    opacity: 0.2;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.coin-bet:hover {
+    border-color: var(--color-gold);
+    transform: scale(1.08);
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.4);
+}
+
+.coin-bet:hover::before {
+    width: 300%;
+    height: 300%;
+}
+/* ===== КАСТОМНЫЙ СКРОЛЛБАР (ЗОЛОТОЙ) ===== */
+::-webkit-scrollbar {
+    width: 12px;
+    background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(10, 10, 20, 0.8);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--color-gold), var(--color-gold-old), var(--color-gold));
+    border-radius: 10px;
+    border: 2px solid var(--color-bg-primary);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--color-gold-old), var(--color-gold), var(--color-gold-old));
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    width: 14px;
+}
+
+/* ===== GLITCH-ЭФФЕКТ ДЛЯ ЗАГОЛОВКОВ ===== */
+.menu-title:hover {
+    animation: glitch 0.3s ease-in-out infinite;
+}
+
+@keyframes glitch {
+    0% {
+        text-shadow: 
+            2px 0 0 rgba(255, 0, 64, 0.7),
+            -2px 0 0 rgba(0, 255, 255, 0.7);
+        transform: translate(0);
+    }
+    20% {
+        text-shadow: 
+            2px 2px 0 rgba(255, 0, 64, 0.7),
+            -2px -2px 0 rgba(0, 255, 255, 0.7);
+        transform: translate(-2px, 2px);
+    }
+    40% {
+        text-shadow: 
+            -2px -2px 0 rgba(255, 0, 64, 0.7),
+            2px 2px 0 rgba(0, 255, 255, 0.7);
+        transform: translate(2px, -2px);
+    }
+    60% {
+        text-shadow: 
+            2px -2px 0 rgba(255, 0, 64, 0.7),
+            -2px 2px 0 rgba(0, 255, 255, 0.7);
+        transform: translate(-2px, -2px);
+    }
+    80% {
+        text-shadow: 
+            -2px 2px 0 rgba(255, 0, 64, 0.7),
+            2px -2px 0 rgba(0, 255, 255, 0.7);
+        transform: translate(2px, 2px);
+    }
+    100% {
+        text-shadow: 
+            2px 0 0 rgba(255, 0, 64, 0.7),
+            -2px 0 0 rgba(0, 255, 255, 0.7);
+        transform: translate(0);
+    }
+}
+
+/* ===== ДОПОЛНИТЕЛЬНЫЕ АНИМАЦИИ ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+/* ===== ЭФФЕКТ РЯБИ ПРИ КЛИКЕ ===== */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 215, 0, 0.6);
+    transform: scale(0);
+    animation: rippleEffect 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes rippleEffect {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ===== АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И ТЕЛЕФОНОВ ===== */
+@media (max-width: 768px) {
+    .games-menu {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .game-btn {
+        padding: 2rem 1rem;
+    }
+
+    .menu-title {
+        font-size: 2rem;
+    }
+
+    .bet-buttons {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
+    .mines-grid {
+        gap: 0.4rem;
+        max-width: 100%;
+    }
+
+    .mines-cell {
+        font-size: 1.8rem;
+    }
+
+    .roulette-wheel {
+        width: 180px;
+        height: 180px;
+        font-size: 3.5rem;
+    }
+
+    .slots-reel {
+        width: 90px;
+        height: 90px;
+        font-size: 3.5rem;
+    }
+
+    .dice-display,
+    .coin-display {
+        width: 180px;
+        height: 180px;
+        font-size: 3.5rem;
+    }
+
+    .coin-display {
+        font-size: 4.5rem;
+    }
+
+    .roulette-bets,
+    .dice-bets,
+    .coin-bets {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+
+    .game-icon {
+        font-size: 3.5rem;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+    }
+
+    .balance-amount {
+        font-size: 1.1rem;
+    }
+
+    .game-action-btn {
+        font-size: 1.1rem;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-content {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .menu-title {
+        font-size: 1.6rem;
+    }
+
+    .bet-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mines-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .falling-card {
+        font-size: 50px;
+    }
+
+    .game-content {
+        padding: 1.5rem;
+    }
+}
+
+/* ===== ЭФФЕКТЫ ЗАГРУЗКИ ===== */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 215, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--color-gold);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== ДОПОЛНИТЕЛЬНЫЕ УТИЛИТЫ ===== */
+.text-gold {
+    color: var(--color-gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.text-neon {
+    color: var(--color-neon-orange);
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+}
+
+.glow {
+    box-shadow: 0 0 20px currentColor;
+}
+
+.blur-bg {
+    backdrop-filter: blur(10px);
+    background: rgba(20, 15, 30, 0.7);
+}
+
+/* ===== ЭФФЕКТ НИМБА (ЗОЛОТОЕ СВЕЧЕНИЕ) ===== */
+.nimbus {
+    position: relative;
+}
+
+.nimbus::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.nimbus:hover::after {
+    opacity: 1;
+}
+
+/* ===== ФИНАЛЬНЫЕ ШТРИХИ ===== */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gold) var(--color-bg-secondary);
+}
+
+body {
+    animation: fadeIn 0.5s ease-in;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+button {
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Плавность для всех переходов */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Отключение параллакса на мобильных для производительности */
+@media (max-width: 768px) {
+    body::before,
+    .header,
+    .main-menu,
+    .game-screen,
+    .falling-card {
+        transform: none !important;
+    }
 }
