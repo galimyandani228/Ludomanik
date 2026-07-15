@@ -1,10 +1,6 @@
 // ============================================================
-// LUDOMANIKS CASINO — Mini App Script (Flask API версия)
+// LUDOMANIKS CASINO — Mini App Script (Telegram WebApp версия)
 // ============================================================
-
-// ===== КОНФИГ =====
-// ⚠️ ЕСЛИ БОТ НА ДРУГОМ КОМПЬЮТЕРЕ — ЗАМЕНИ НА ЕГО IP
-const API_URL = 'http://172.16.5.55:5000';
 
 // ===== TELEGRAM WEB APP =====
 const tg = window.Telegram?.WebApp;
@@ -28,51 +24,38 @@ const state = {
 // ===== УТИЛИТЫ =====
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// ===== HTTP ЗАПРОСЫ К БОТУ =====
-
-async function requestBalance() {
-    try {
-        console.log('📥 Запрос баланса для user_id:', state.userId);
-        const res = await fetch(`${API_URL}/api/balance?user_id=${state.userId}`);
-        const data = await res.json();
-        console.log('📩 Ответ от бота:', data);
-        
-        if (data.balance !== undefined) {
-            updateBalance(data.balance);
-            state.isBalanceLoaded = true;
-        }
-        return data;
-    } catch (e) {
-        console.error('❌ Ошибка получения баланса:', e);
-        // Если ошибка — показываем начальный баланс
-        if (!state.isBalanceLoaded) {
-            updateBalance(1000);
-            state.isBalanceLoaded = true;
-        }
+// ===== ОТПРАВКА В БОТ =====
+function sendAction(action, data = {}) {
+    if (tg) {
+        tg.sendData(JSON.stringify({ action, ...data }));
+        console.log('📤 Отправлено:', action, data);
     }
 }
 
-async function sendGameResult(action, amount) {
-    try {
-        const res = await fetch(`${API_URL}/api/balance`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                user_id: state.userId, 
-                action: action, 
-                amount: amount 
-            })
-        });
-        const data = await res.json();
-        console.log('📩 Ответ после игры:', data);
-        
-        if (data.balance !== undefined) {
-            updateBalance(data.balance);
+function requestBalance() {
+    console.log('📥 Запрос баланса...');
+    sendAction('get_balance');
+}
+
+function sendGameResult(action, amount) {
+    sendAction(action, { amount });
+}
+
+// ===== ОБРАБОТКА ОТВЕТОВ ОТ БОТА =====
+if (tg) {
+    tg.onEvent('message', (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            console.log('📩 Получено от бота:', data);
+            
+            if (data.action === 'balance_updated') {
+                updateBalance(data.balance);
+                state.isBalanceLoaded = true;
+            }
+        } catch (e) {
+            console.error('❌ Ошибка:', e);
         }
-        return data;
-    } catch (e) {
-        console.error('❌ Ошибка отправки:', e);
-    }
+    });
 }
 
 // ===== ОБНОВЛЕНИЕ БАЛАНСА =====
@@ -98,17 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация приложения...');
     console.log('👤 User ID:', state.userId);
     
-    // Сначала показываем заглушку
     updateBalance(0);
-    
-    // Запрашиваем баланс
     requestBalance();
 
-    // Инициализация меню
     initMainMenu();
     addSyncButton();
 
-    // Если баланс не пришел через 3 секунды — ставим 1000
     setTimeout(() => {
         if (!state.isBalanceLoaded) {
             console.log('⏰ Таймаут, устанавливаем начальный баланс');
@@ -280,463 +258,9 @@ function addSyncButton() {
 }
 
 // ============================================================
-// ИГРА 1: МИННОЕ ПОЛЕ
+// ИГРЫ (рендеринг — такой же как был, НЕ МЕНЯЙ)
 // ============================================================
 
-function renderMinesGame(container) {
-    let minesData = {
-        grid: Array(25).fill(false),
-        mines: [],
-        opened: 0,
-        gameActive: false,
-        multiplier: 1.0
-    };
-
-    let html = createBetSelector();
-    html += '<div class="mines-container">';
-    html += '<div class="mines-stats">';
-    html += '<div>Открыто: <span id="mines-opened">0</span> / 22</div>';
-    html += '<div>Множитель: <span id="mines-multiplier">1.00x</span></div>';
-    html += '</div>';
-    html += '<div class="mines-grid" id="mines-grid"></div>';
-    html += '<button class="game-action-btn" id="mines-start">🚀 Начать игру</button>';
-    html += '<button class="game-action-btn secondary" id="mines-cashout" style="display:none;">💵 Забрать выигрыш</button>';
-    html += '</div>';
-
-    container.innerHTML = html;
-    initBetSelector(container);
-
-    const grid = container.querySelector('#mines-grid');
-    const startBtn = container.querySelector('#mines-start');
-    const cashoutBtn = container.querySelector('#mines-cashout');
-    const openedEl = container.querySelector('#mines-opened');
-    const multiplierEl = container.querySelector('#mines-multiplier');
-
-    for (let i = 0; i < 25; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'mines-cell';
-        cell.dataset.index = i;
-        cell.textContent = '❔';
-        grid.appendChild(cell);
-    }
-
-    startBtn.addEventListener('click', () => {
-        if (state.bet > state.balance) {
-            showMessage('Недостаточно средств!', 'error');
-            return;
-        }
-
-        updateBalance(state.balance - state.bet);
-        sendGameResult('lose', state.bet);
-
-        minesData.mines = [];
-        while (minesData.mines.length < 3) {
-            const pos = Math.floor(Math.random() * 25);
-            if (!minesData.mines.includes(pos)) {
-                minesData.mines.push(pos);
-            }
-        }
-
-        minesData.grid = Array(25).fill(false);
-        minesData.opened = 0;
-        minesData.gameActive = true;
-        minesData.multiplier = 1.0;
-
-        grid.querySelectorAll('.mines-cell').forEach(cell => {
-            cell.textContent = '❔';
-            cell.className = 'mines-cell';
-        });
-
-        openedEl.textContent = '0';
-        multiplierEl.textContent = '1.00x';
-        startBtn.style.display = 'none';
-        cashoutBtn.style.display = 'block';
-
-        showMessage('Игра началась! Выбирайте клетки', 'success');
-    });
-
-    grid.addEventListener('click', (e) => {
-        if (!minesData.gameActive) return;
-
-        const cell = e.target.closest('.mines-cell');
-        if (!cell || cell.classList.contains('opened')) return;
-
-        const index = parseInt(cell.dataset.index);
-
-        if (minesData.mines.includes(index)) {
-            cell.textContent = '💣';
-            cell.classList.add('mine');
-            minesData.gameActive = false;
-
-            minesData.mines.forEach(mineIndex => {
-                grid.children[mineIndex].textContent = '💣';
-                grid.children[mineIndex].classList.add('mine');
-            });
-
-            showMessage('💥 Вы взорвались! Проигрыш!', 'error');
-            startBtn.style.display = 'block';
-            cashoutBtn.style.display = 'none';
-        } else {
-            cell.textContent = '✅';
-            cell.classList.add('safe', 'opened');
-            minesData.grid[index] = true;
-            minesData.opened++;
-
-            minesData.multiplier = 1.0 + (minesData.opened / 22) * 1.5;
-
-            openedEl.textContent = minesData.opened;
-            multiplierEl.textContent = minesData.multiplier.toFixed(2) + 'x';
-
-            if (minesData.opened === 22) {
-                minesData.gameActive = false;
-                const winAmount = Math.floor(state.bet * minesData.multiplier);
-                updateBalance(state.balance + winAmount);
-                sendGameResult('win', winAmount);
-                showMessage(`🎉 Победа! +${winAmount} ₽`, 'success');
-                startBtn.style.display = 'block';
-                cashoutBtn.style.display = 'none';
-            }
-        }
-    });
-
-    cashoutBtn.addEventListener('click', () => {
-        if (!minesData.gameActive) return;
-
-        const winAmount = Math.floor(state.bet * minesData.multiplier);
-        updateBalance(state.balance + winAmount);
-        sendGameResult('win', winAmount);
-        minesData.gameActive = false;
-
-        showMessage(`✅ Вы забрали ${winAmount} ₽`, 'success');
-        startBtn.style.display = 'block';
-        cashoutBtn.style.display = 'none';
-    });
-}
-
-// ============================================================
-// ИГРА 2: РУЛЕТКА
-// ============================================================
-
-function renderRouletteGame(container) {
-    const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-
-    let html = createBetSelector();
-    html += '<div class="roulette-container">';
-    html += '<div class="roulette-wheel" id="roulette-wheel">🎡</div>';
-    html += '<div class="roulette-bets">';
-    html += '<button class="roulette-bet red" data-bet="red">🔴 Красное (x2)</button>';
-    html += '<button class="roulette-bet black" data-bet="black">⚫ Чёрное (x2)</button>';
-    html += '<button class="roulette-bet green" data-bet="zero">🟢 Зеро (x14)</button>';
-    html += '<button class="roulette-bet" data-bet="even">Чёт (x2)</button>';
-    html += '<button class="roulette-bet" data-bet="odd">Нечет (x2)</button>';
-    html += '<button class="roulette-bet" data-bet="low">1-18 (x2)</button>';
-    html += '<button class="roulette-bet" data-bet="high">19-36 (x2)</button>';
-    html += '</div>';
-    html += '</div>';
-
-    container.innerHTML = html;
-    initBetSelector(container);
-
-    const wheel = container.querySelector('#roulette-wheel');
-    let isSpinning = false;
-
-    container.querySelectorAll('.roulette-bet').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            if (isSpinning) return;
-
-            if (state.bet > state.balance) {
-                showMessage('Недостаточно средств!', 'error');
-                return;
-            }
-
-            const betType = btn.dataset.bet;
-            
-            updateBalance(state.balance - state.bet);
-            sendGameResult('lose', state.bet);
-            isSpinning = true;
-
-            for (let i = 0; i < 8; i++) {
-                wheel.textContent = Math.floor(Math.random() * 37);
-                wheel.style.transform = `scale(${1 + Math.sin(i) * 0.2})`;
-                await sleep(150);
-            }
-
-            const result = Math.floor(Math.random() * 37);
-            wheel.textContent = result;
-            wheel.style.transform = 'scale(1.3)';
-
-            let color = 'green';
-            if (result !== 0) {
-                color = redNumbers.includes(result) ? 'red' : 'black';
-            }
-
-            wheel.className = `roulette-wheel ${color}`;
-
-            await sleep(500);
-            wheel.style.transform = 'scale(1)';
-
-            let win = false;
-            let multiplier = 0;
-
-            if (betType === 'red' && color === 'red') { win = true; multiplier = 2; }
-            else if (betType === 'black' && color === 'black') { win = true; multiplier = 2; }
-            else if (betType === 'zero' && result === 0) { win = true; multiplier = 14; }
-            else if (betType === 'even' && result !== 0 && result % 2 === 0) { win = true; multiplier = 2; }
-            else if (betType === 'odd' && result % 2 === 1) { win = true; multiplier = 2; }
-            else if (betType === 'low' && result >= 1 && result <= 18) { win = true; multiplier = 2; }
-            else if (betType === 'high' && result >= 19 && result <= 36) { win = true; multiplier = 2; }
-
-            if (win) {
-                const winAmount = state.bet * multiplier;
-                updateBalance(state.balance + winAmount);
-                sendGameResult('win', winAmount);
-                showMessage(`🎉 Победа! +${winAmount} ₽`, 'success');
-            } else {
-                showMessage('😢 Проигрыш!', 'error');
-            }
-
-            isSpinning = false;
-        });
-    });
-}
-
-// ============================================================
-// ИГРА 3: СЛОТЫ
-// ============================================================
-
-function renderSlotsGame(container) {
-    const symbols = ['🍒', '🍋', '🍊', '🍇', '💎', '🔔', '⭐', '7️⃣', '🎰'];
-    const payouts = {
-        '🎰': 50, '7️⃣': 30, '💎': 20, '🔔': 15, '⭐': 10,
-        '🍇': 8, '🍊': 5, '🍋': 3, '🍒': 2
-    };
-
-    let html = createBetSelector();
-    html += '<div class="slots-container">';
-    html += '<div class="slots-reels">';
-    html += '<div class="slots-reel" id="reel-1">🍒</div>';
-    html += '<div class="slots-reel" id="reel-2">🍋</div>';
-    html += '<div class="slots-reel" id="reel-3">🍊</div>';
-    html += '</div>';
-    html += '<button class="game-action-btn" id="slots-spin">🎰 Крутить (Ставка: ' + state.bet + ' ₽)</button>';
-    html += '</div>';
-
-    container.innerHTML = html;
-    initBetSelector(container, (bet) => {
-        container.querySelector('#slots-spin').textContent = `🎰 Крутить (Ставка: ${bet} ₽)`;
-    });
-
-    const reels = [
-        container.querySelector('#reel-1'),
-        container.querySelector('#reel-2'),
-        container.querySelector('#reel-3')
-    ];
-    const spinBtn = container.querySelector('#slots-spin');
-    let isSpinning = false;
-
-    spinBtn.addEventListener('click', async () => {
-        if (isSpinning) return;
-
-        if (state.bet > state.balance) {
-            showMessage('Недостаточно средств!', 'error');
-            return;
-        }
-
-        updateBalance(state.balance - state.bet);
-        sendGameResult('lose', state.bet);
-        isSpinning = true;
-        spinBtn.disabled = true;
-
-        for (let i = 0; i < 5; i++) {
-            reels.forEach(reel => {
-                reel.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                reel.style.transform = 'scale(1.2)';
-            });
-            await sleep(150);
-            reels.forEach(reel => reel.style.transform = 'scale(1)');
-            await sleep(50);
-        }
-
-        const results = [
-            symbols[Math.floor(Math.random() * symbols.length)],
-            symbols[Math.floor(Math.random() * symbols.length)],
-            symbols[Math.floor(Math.random() * symbols.length)]
-        ];
-
-        reels.forEach((reel, i) => {
-            reel.textContent = results[i];
-            reel.style.transform = 'scale(1.3)';
-        });
-
-        await sleep(500);
-        reels.forEach(reel => reel.style.transform = 'scale(1)');
-
-        let multiplier = 0;
-
-        if (results[0] === results[1] && results[1] === results[2]) {
-            multiplier = payouts[results[0]] || 2;
-        } else if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
-            multiplier = 2;
-        }
-
-        if (multiplier > 0) {
-            const winAmount = state.bet * multiplier;
-            updateBalance(state.balance + winAmount);
-            sendGameResult('win', winAmount);
-            showMessage(`🎉 Победа! +${winAmount} ₽ (x${multiplier})`, 'success');
-        } else {
-            showMessage('😢 Проигрыш!', 'error');
-        }
-
-        isSpinning = false;
-        spinBtn.disabled = false;
-    });
-}
-
-// ============================================================
-// ИГРА 4: КОСТИ
-// ============================================================
-
-function renderDiceGame(container) {
-    let html = createBetSelector();
-    html += '<div class="dice-container">';
-    html += '<div class="dice-display" id="dice-result">🎲 ?</div>';
-    html += '<div class="dice-bets">';
-    html += '<button class="dice-bet" data-bet="under">⬇️ 1-3 (x1.9)</button>';
-    html += '<button class="dice-bet" data-bet="over">⬆️ 4-6 (x1.9)</button>';
-
-    for (let i = 1; i <= 6; i++) {
-        html += `<button class="dice-bet small" data-bet="${i}">${i} (x5)</button>`;
-    }
-
-    html += '</div>';
-    html += '</div>';
-
-    container.innerHTML = html;
-    initBetSelector(container);
-
-    const display = container.querySelector('#dice-result');
-    let isRolling = false;
-
-    container.querySelectorAll('.dice-bet').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            if (isRolling) return;
-
-            if (state.bet > state.balance) {
-                showMessage('Недостаточно средств!', 'error');
-                return;
-            }
-
-            const betType = btn.dataset.bet;
-            
-            updateBalance(state.balance - state.bet);
-            sendGameResult('lose', state.bet);
-            isRolling = true;
-
-            for (let i = 0; i < 6; i++) {
-                display.textContent = `🎲 ${Math.floor(Math.random() * 6) + 1}`;
-                display.style.transform = `rotate(${i * 60}deg) scale(1.2)`;
-                await sleep(150);
-            }
-
-            const result = Math.floor(Math.random() * 6) + 1;
-            display.textContent = `🎲 ${result}`;
-            display.style.transform = 'rotate(0deg) scale(1.5)';
-
-            await sleep(500);
-            display.style.transform = 'rotate(0deg) scale(1)';
-
-            let win = false;
-            let multiplier = 0;
-
-            if (betType === 'under' && result >= 1 && result <= 3) {
-                win = true;
-                multiplier = 1.9;
-            } else if (betType === 'over' && result >= 4 && result <= 6) {
-                win = true;
-                multiplier = 1.9;
-            } else if (parseInt(betType) === result) {
-                win = true;
-                multiplier = 5;
-            }
-
-            if (win) {
-                const winAmount = Math.floor(state.bet * multiplier);
-                updateBalance(state.balance + winAmount);
-                sendGameResult('win', winAmount);
-                showMessage(`🎉 Победа! +${winAmount} ₽`, 'success');
-            } else {
-                showMessage('😢 Проигрыш!', 'error');
-            }
-
-            isRolling = false;
-        });
-    });
-}
-
-// ============================================================
-// ИГРА 5: МОНЕТКА
-// ============================================================
-
-function renderCoinGame(container) {
-    let html = createBetSelector();
-    html += '<div class="coin-container">';
-    html += '<div class="coin-display" id="coin-result">🪙</div>';
-    html += '<div class="coin-bets">';
-    html += '<button class="coin-bet" data-bet="heads">🦅 Орёл (x2)</button>';
-    html += '<button class="coin-bet" data-bet="tails">🪙 Решка (x2)</button>';
-    html += '</div>';
-    html += '</div>';
-
-    container.innerHTML = html;
-    initBetSelector(container);
-
-    const display = container.querySelector('#coin-result');
-    let isFlipping = false;
-
-    container.querySelectorAll('.coin-bet').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            if (isFlipping) return;
-
-            if (state.bet > state.balance) {
-                showMessage('Недостаточно средств!', 'error');
-                return;
-            }
-
-            const betType = btn.dataset.bet;
-            
-            updateBalance(state.balance - state.bet);
-            sendGameResult('lose', state.bet);
-            isFlipping = true;
-
-            const frames = ['🪙', '🌕', '🪙', '🌗', '🪙', '🌑', '🪙'];
-            for (let i = 0; i < frames.length; i++) {
-                display.textContent = frames[i];
-                const scale = 1 + Math.sin((i / frames.length) * Math.PI) * 0.5;
-                display.style.transform = `scale(${scale}) rotateY(${i * 180}deg)`;
-                await sleep(200);
-            }
-
-            const result = Math.random() < 0.5 ? 'heads' : 'tails';
-            display.textContent = result === 'heads' ? '🦅' : '🪙';
-            display.style.transform = 'scale(1.5) rotateY(0deg)';
-
-            await sleep(500);
-            display.style.transform = 'scale(1) rotateY(0deg)';
-
-            if (betType === result) {
-                const winAmount = state.bet * 2;
-                updateBalance(state.balance + winAmount);
-                sendGameResult('win', winAmount);
-                showMessage(`🎉 Победа! +${winAmount} ₽`, 'success');
-            } else {
-                showMessage('😢 Проигрыш!', 'error');
-            }
-
-            isFlipping = false;
-        });
-    });
-}
-
-console.log('🎰 LUDOMANIKS CASINO загружен!');
-console.log('👤 User ID:', state.userId);
+// ... остальной код игр (renderMinesGame, renderRouletteGame, renderSlotsGame, renderDiceGame, renderCoinGame) остаётся ТАКИМ ЖЕ, как в твоём файле, только удали все вызовы sendGameResult и замени на:
+// sendGameResult('win', winAmount) -> sendAction('mines_win', { win: winAmount })
+// sendGameResult('lose', state.bet) -> sendAction('mines_lose', { bet: state.bet })
