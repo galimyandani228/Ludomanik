@@ -1,477 +1,568 @@
-/* ===== CSS VARIABLES ===== */
+/* === CASINO PREMIUM CSS === */
+/* Импорт премиум шрифтов */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
+
 :root {
-    --bg-deep: #06060d;
-    --bg-card: rgba(16, 16, 36, 0.65);
-    --border-subtle: rgba(255, 255, 255, 0.04);
-    --border-glow: rgba(140, 140, 255, 0.18);
-    --text-primary: #e8e8f8;
-    --text-dim: #7a7a9a;
-    --gold: #d4af37;
-    --gold-glow: rgba(212, 175, 55, 0.5);
-    --win: #5ef5a0;
-    --win-glow: rgba(94, 245, 160, 0.5);
-    --lose: #ff5e7a;
-    --lose-glow: rgba(255, 94, 122, 0.5);
-    --neon-blue: #7b7bff;
-    --neon-purple: #b17bff;
-    --ease-smooth: cubic-bezier(0.22, 0.61, 0.36, 1);
-    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --gold: #D4AF37;
+  --gold-light: #F3E5AB;
+  --gold-dark: #B8860B;
+  --black: #0a0a0a;
+  --deep-purple: #1a0a2e;
+  --red: #8B0000;
+  --red-neon: #ff1a1a;
+  --white: #ffffff;
+  --card-bg: rgba(26, 10, 46, 0.9);
 }
 
-/* ===== RESET ===== */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* ===== BODY — анимированный фон ===== */
 body {
-    font-family: 'Inter', 'SF Pro Display', 'Courier New', monospace;
-    background: var(--bg-deep);
-    color: var(--text-primary);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+  background: var(--black);
+  color: var(--white);
+  overflow-x: hidden;
+  cursor: default;
 }
 
-/* Анимированная радиальная подсветка фона */
+/* === АНИМИРОВАННЫЙ ФОН С ЧАСТИЦАМИ === */
 body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 80% 60% at 50% 20%, rgba(120, 80, 255, 0.08), transparent),
-        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(212, 175, 55, 0.04), transparent),
-        radial-gradient(ellipse 50% 50% at 20% 70%, rgba(94, 245, 160, 0.03), transparent);
-    pointer-events: none;
-    animation: bgPulse 8s ease-in-out infinite alternate;
-    z-index: 0;
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(26, 10, 46, 0.9) 0%, transparent 50%),
+    linear-gradient(180deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
+  z-index: -2;
+  animation: bgPulse 8s ease-in-out infinite alternate;
+}
+
+/* Анимированные золотые частицы */
+.particles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold);
+  animation: floatParticle 6s ease-in-out infinite;
+}
+
+.particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { left: 25%; animation-delay: 1.2s; }
+.particle:nth-child(3) { left: 40%; animation-delay: 0.8s; }
+.particle:nth-child(4) { left: 55%; animation-delay: 2s; }
+.particle:nth-child(5) { left: 70%; animation-delay: 1.5s; }
+.particle:nth-child(6) { left: 85%; animation-delay: 0.3s; }
+.particle:nth-child(7) { left: 15%; animation-delay: 2.5s; }
+.particle:nth-child(8) { left: 95%; animation-delay: 1.7s; }
+
+@keyframes floatParticle {
+  0%, 100% { 
+    transform: translateY(100vh) rotate(0deg); 
+    opacity: 0;
+  }
+  10% { 
+    opacity: 1;
+  }
+  90% { 
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(-100vh) rotate(720deg); 
+    opacity: 0;
+  }
 }
 
 @keyframes bgPulse {
-    0% {
-        opacity: 0.7;
-        transform: scale(1);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
 }
 
-/* Плавающие частицы */
-body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-        radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.3), transparent),
-        radial-gradient(1px 1px at 40% 70%, rgba(255, 255, 255, 0.2), transparent),
-        radial-gradient(1.5px 1.5px at 60% 20%, rgba(180, 180, 255, 0.4), transparent),
-        radial-gradient(1px 1px at 80% 50%, rgba(212, 175, 55, 0.3), transparent),
-        radial-gradient(1.5px 1.5px at 10% 80%, rgba(94, 245, 160, 0.25), transparent),
-        radial-gradient(1px 1px at 90% 10%, rgba(255, 255, 255, 0.2), transparent),
-        radial-gradient(1px 1px at 50% 50%, rgba(180, 180, 255, 0.35), transparent);
-    background-size: 200% 200%;
-    animation: particlesFloat 20s linear infinite;
-}
-
-@keyframes particlesFloat {
-    0% {
-        background-position: 0% 0%;
-    }
-    25% {
-        background-position: 100% 0%;
-    }
-    50% {
-        background-position: 100% 100%;
-    }
-    75% {
-        background-position: 0% 100%;
-    }
-    100% {
-        background-position: 0% 0%;
-    }
-}
-
-/* ===== APP CONTAINER ===== */
-#app {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 440px;
-    height: 100vh;
-    max-height: 860px;
-    display: flex;
-    flex-direction: column;
-    background: rgba(10, 10, 20, 0.7);
-    backdrop-filter: blur(40px) saturate(140%);
-    -webkit-backdrop-filter: blur(40px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 24px;
-    box-shadow:
-        0 0 120px rgba(100, 80, 255, 0.08),
-        0 0 40px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
-    overflow: hidden;
-}
-
-/* Декоративная рамка-сияние */
-#app::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: 24px;
-    padding: 1px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 40%, rgba(120, 80, 255, 0.12) 70%, rgba(255, 255, 255, 0.05));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-}
-
-/* ===== ШАПКА ===== */
+/* === ПРЕМИУМ ШАПКА === */
 .header {
-    padding: 24px 24px 20px;
-    background: linear-gradient(180deg, rgba(16, 14, 30, 0.9), transparent);
-    border-bottom: 1px solid var(--border-subtle);
-    flex-shrink: 0;
-    position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: linear-gradient(180deg, rgba(10,10,10,0.98) 0%, rgba(10,10,10,0.8) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 2px solid var(--gold);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
 }
 
-/* Тонкая акцентная линия под шапкой */
 .header::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 24px;
-    width: 40px;
-    height: 2px;
-    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), transparent);
-    border-radius: 2px;
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: shine 3s linear infinite;
 }
 
 .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(212,175,55,0.5);
+  transition: all 0.3s ease;
+  letter-spacing: 3px;
 }
 
-.logo-icon {
-    font-size: 28px;
-    filter: drop-shadow(0 0 12px rgba(120, 120, 255, 0.5));
-    animation: logoGlow 3s ease-in-out infinite;
+.logo:hover {
+  transform: scale(1.05);
+  filter: brightness(1.5);
 }
 
-@keyframes logoGlow {
-    0%,
-    100% {
-        filter: drop-shadow(0 0 8px rgba(120, 120, 255, 0.4));
-    }
-    50% {
-        filter: drop-shadow(0 0 20px rgba(160, 140, 255, 0.7));
-    }
+/* Навигация */
+.nav {
+  display: flex;
+  gap: 2rem;
 }
 
-.logo-text {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 5px;
-    background: linear-gradient(135deg, #d8d8f8, #a0a0e0, #c8c8f8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: none;
-    position: relative;
+.nav-item {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--white);
+  text-decoration: none;
+  position: relative;
+  padding: 0.5rem 0;
+  transition: all 0.3s ease;
 }
 
-/* Глитч-эффект для лого */
-.logo-text::after {
-    content: 'GAMBIT';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    background: linear-gradient(135deg, #d8d8f8, #a0a0e0, #c8c8f8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: logoGlitch 5s ease-in-out infinite;
+.nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+
+.nav-item:hover {
+  color: var(--gold);
+  text-shadow: 0 0 20px var(--gold);
+}
+
+.nav-item:hover::after {
+  width: 100%;
+}
+
+/* === ГЕРОЙ СЕКЦИЯ === */
+.hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Анимированные карты на фоне */
+.hero::before {
+  content: '♠ ♥ ♣ ♦';
+  position: absolute;
+  font-size: 15rem;
+  color: rgba(212,175,55,0.03);
+  animation: floatingCards 20s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes floatingCards {
+  0% { transform: translateX(100%) rotate(10deg); }
+  100% { transform: translateX(-100%) rotate(-10deg); }
+}
+
+.hero-content {
+  z-index: 2;
+  max-width: 800px;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  background: linear-gradient(180deg, var(--white) 0%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleGlow 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% { text-shadow: 0 0 20px var(--gold); }
+  50% { text-shadow: 0 0 40px var(--gold), 0 0 80px var(--gold); }
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  color: var(--gold-light);
+  margin-bottom: 2rem;
+  font-weight: 300;
+  letter-spacing: 5px;
+  animation: fadeInUp 1s ease 0.5s both;
+}
+
+/* === КНОПКИ === */
+.btn {
+  display: inline-block;
+  padding: 1.2rem 3rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--black);
+  border-radius: 5px;
+  box-shadow: 0 10px 30px rgba(212,175,55,0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(212,175,55,0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(-1px);
+}
+
+/* Эффект блика */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: rotate(45deg);
+  transition: 0.5s;
+  animation: btnShine 3s infinite;
+}
+
+@keyframes btnShine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  20%, 100% { transform: translateX(100%) rotate(45deg); }
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--gold);
+  border: 2px solid var(--gold);
+  border-radius: 5px;
+}
+
+.btn-secondary:hover {
+  background: var(--gold);
+  color: var(--black);
+  box-shadow: 0 0 30px var(--gold);
+}
+
+/* === КАРТОЧКИ ИГР === */
+.games-section {
+  padding: 5rem 2rem;
+  position: relative;
+}
+
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(212,175,55,0.5);
+  position: relative;
+  letter-spacing: 5px;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 3px;
+  background: var(--gold);
+  margin: 1rem auto;
+  animation: widenLine 2s ease-in-out infinite;
+}
+
+@keyframes widenLine {
+  0%, 100% { width: 100px; }
+  50% { width: 200px; }
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.game-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.5s ease;
+  cursor: pointer;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.game-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  border-color: var(--gold);
+  box-shadow: 
+    0 20px 40px rgba(0,0,0,0.3),
+    0 0 30px rgba(212,175,55,0.3),
+    0 0 60px rgba(212,175,55,0.1);
+}
+
+.game-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, var(--black) 0%, transparent 50%);
+  z-index: 1;
+}
+
+.card-image {
+  width: 100%;
+  height: 250px;
+  background: linear-gradient(135deg, #1a0a2e, #2a1a3e);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Анимированные фигуры на карте */
+.card-image::after {
+  content: '🎰';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 5rem;
+  animation: slotSpin 3s ease-in-out infinite;
+}
+
+@keyframes slotSpin {
+  0% { transform: translate(-50%, -50%) rotateY(0deg); }
+  50% { transform: translate(-50%, -50%) rotateY(180deg); }
+  100% { transform: translate(-50%, -50%) rotateY(360deg); }
+}
+
+.card-content {
+  padding: 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--gold);
+}
+
+.card-description {
+  color: rgba(255,255,255,0.7);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* === СЕКЦИЯ ДЖЕКПОТА === */
+.jackpot {
+  background: linear-gradient(135deg, #1a0a2e, #0a0a0a);
+  border: 2px solid var(--gold);
+  margin: 3rem auto;
+  max-width: 800px;
+  padding: 2rem;
+  border-radius: 20px;
+  text-align: center;
+  animation: jackpotPulse 2s ease-in-out infinite;
+}
+
+@keyframes jackpotPulse {
+  0%, 100% { 
+    box-shadow: 0 0 50px rgba(212,175,55,0.3);
+  }
+  50% { 
+    box-shadow: 0 0 100px rgba(212,175,55,0.6);
+  }
+}
+
+.jackpot-amount {
+  font-family: 'Cinzel', serif;
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: countUp 2s ease-out;
+}
+
+/* === ФУТЕР === */
+.footer {
+  background: var(--black);
+  border-top: 3px solid var(--gold);
+  padding: 3rem 2rem;
+  position: relative;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(212,175,55,0.03) 2px,
+      rgba(212,175,55,0.03) 4px
+    );
+}
+
+/* === СКРОЛЛБАР === */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+}
+
+/* === МЕДИА-ЗАПРОСЫ === */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .nav {
+    gap: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+}
+
+/* === АНИМАЦИИ ПРИ ЗАГРУЗКЕ === */
+@keyframes fadeInUp {
+  from {
     opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes logoGlitch {
-    0%,
-    93%,
-    96%,
-    100% {
-        opacity: 0;
-        transform: translate(0);
-    }
-    94% {
-        opacity: 0.6;
-        transform: translate(-2px, 1px);
-    }
-    95% {
-        opacity: 0.4;
-        transform: translate(2px, -1px);
-    }
+.fade-in-up {
+  animation: fadeInUp 0.8s ease both;
 }
 
-.balance-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(20, 18, 40, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
-    padding: 10px 20px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    position: relative;
-    overflow: hidden;
+/* === ЭФФЕКТЫ ПРИ НАВЕДЕНИИ === */
+.hover-gold {
+  transition: all 0.3s ease;
 }
 
-/* Блик по балансу */
-.balance-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
-    animation: shimmer 3s ease-in-out infinite;
+.hover-gold:hover {
+  color: var(--gold) !important;
+  filter: drop-shadow(0 0 10px var(--gold));
 }
 
-@keyframes shimmer {
-    0% {
-        left: -100%;
-    }
-    100% {
-        left: 100%;
-    }
+/* Анимированная полоса загрузки */
+.loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: loading 2s ease-in-out infinite;
+  z-index: 9999;
 }
 
-.balance-label {
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    font-weight: 700;
-    text-transform: uppercase;
+@keyframes loading {
+  0% { width: 0%; left: 0; }
+  50% { width: 100%; left: 0; }
+  100% { width: 0%; left: 100%; }
 }
 
-.balance-amount {
-    font-size: 22px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--win), #3ddc84);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 10px var(--win-glow));
-    transition: all 0.4s var(--ease-smooth);
+/* Текст с эффектом неона для кнопок */
+.neon-text {
+  text-shadow: 
+    0 0 5px var(--gold),
+    0 0 10px var(--gold),
+    0 0 20px var(--gold),
+    0 0 40px var(--gold-dark);
 }
-
-/* ===== МЕНЮ ИГР ===== */
-#mainMenu {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 24px;
-}
-
-.menu-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    width: 100%;
-}
-
-.game-btn {
-    background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 18px;
-    padding: 28px 16px 24px;
-    cursor: pointer;
-    transition: all 0.4s var(--ease-smooth);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    position: relative;
-    overflow: hidden;
-}
-
-/* Градиентная подсветка сверху */
-.game-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60%;
-    background: radial-gradient(ellipse at center top, rgba(255, 255, 255, 0.03), transparent);
-    pointer-events: none;
-    transition: opacity 0.4s;
-}
-
-/* Hover: только для десктопа */
-@media (hover: hover) {
-    .game-btn:hover {
-        border-color: var(--border-glow);
-        transform: translateY(-4px);
-        box-shadow:
-            0 16px 40px rgba(0, 0, 0, 0.4),
-            0 0 60px rgba(120, 80, 255, 0.08);
-    }
-    .game-btn:hover::before {
-        opacity: 1.5;
-    }
-    .game-btn:hover .game-icon {
-        transform: scale(1.1) translateY(-2px);
-    }
-}
-
-.game-btn:active {
-    transform: scale(0.95);
-    border-color: rgba(255, 255, 255, 0.12);
-    transition: all 0.15s var(--ease-smooth);
-}
-
-.game-btn .game-icon {
-    font-size: 36px;
-    margin-bottom: 6px;
-    transition: all 0.4s var(--ease-bounce);
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
-}
-
-.game-btn .game-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 2px;
-    transition: letter-spacing 0.4s;
-}
-
-.game-btn .game-desc {
-    font-size: 10px;
-    color: var(--text-dim);
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-}
-
-/* ===== ЭКРАН ИГРЫ ===== */
-#gameScreen {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 24px 24px;
-    animation: screenIn 0.4s var(--ease-smooth);
-}
-
-@keyframes screenIn {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.game-header {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--border-subtle);
-    flex-shrink: 0;
-}
-
-.back-btn {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
-    color: var(--text-dim);
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    cursor: pointer;
-    padding: 8px 14px;
-    transition: all 0.3s;
-    text-transform: uppercase;
-}
-
-@media (hover: hover) {
-    .back-btn:hover {
-        background: rgba(255, 255, 255, 0.06);
-        color: #c0c0e0;
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-}
-
-.back-btn:active {
-    transform: scale(0.94);
-    color: #d0d0f0;
-}
-
-.game-title {
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, #d8d8f8, #b0b0e8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.game-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px 0;
-    gap: 20px;
-}
-
-/* ===== ОБЩИЕ ЭЛЕМЕНТЫ ===== */
-.game-info {
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.game-info .bet-label {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-}
-
-.game-info .bet-value {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--text-primary);
-    filter: drop-shadow(0 0 12px rgba(200, 200, 240, 0.15));
-}
-
-.game-result {
-    font-size: 36px;
-    font-weight: 800;
-    padding: 20px 28px;
-    border-radius: 18px;
-    background: rgba(16, 16
