@@ -1,176 +1,82 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Golden Vegas — Premium Casino</title>
-<link rel="stylesheet" href="casino-theme.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Casino Mini App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+    <!-- Падающие карты на фоне -->
+    <div class="falling-cards">
+        <div class="falling-card">♠</div>
+        <div class="falling-card">♥</div>
+        <div class="falling-card">♣</div>
+        <div class="falling-card">♦</div>
+        <div class="falling-card">♠</div>
+        <div class="falling-card">♥</div>
+    </div>
 
-  <!-- ==========================================================
-       АНИМИРОВАННЫЙ ФОН (частицы + световые пятна)
-       ========================================================== -->
-  <div class="bg-animated">
+    <!-- Золотые частицы -->
     <div class="particles">
-      <span class="particle"></span>
-      <span class="particle"></span>
-      <span class="particle"></span>
-      <span class="particle"></span>
-      <span class="particle"></span>
-      <span class="particle"></span>
-      <span class="particle"></span>
-      <span class="particle"></span>
-    </div>
-  </div>
-
-  <!-- ==========================================================
-       ШАПКА / НАВИГАЦИЯ
-       ========================================================== -->
-  <header class="header">
-    <div class="logo">
-      <span class="text-gradient-gold">GOLDEN</span> VEGAS
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
     </div>
 
-    <nav>
-      <ul class="nav-list">
-        <li><a href="#games" class="nav-link">Игры</a></li>
-        <li><a href="#promo" class="nav-link">Бонусы</a></li>
-        <li><a href="#vip" class="nav-link">VIP</a></li>
-        <li><a href="#support" class="nav-link">Поддержка</a></li>
-      </ul>
-    </nav>
-
-    <button class="btn btn-outline">Войти</button>
-  </header>
-
-  <!-- ==========================================================
-       ГЕРОЙ-СЕКЦИЯ
-       ========================================================== -->
-  <main>
-    <section class="hero animate-fade-in-up" style="padding: var(--space-xl) var(--space-lg); text-align: center;">
-      <h1 class="font-display text-neon" style="font-size: clamp(2rem, 6vw, 4rem); margin-bottom: var(--space-sm);">
-        Испытай удачу по-крупному
-      </h1>
-      <p style="color: var(--color-text-secondary); max-width: 600px; margin: 0 auto var(--space-md);">
-        Более 500 слотов, живое казино и эксклюзивные турниры.
-        Присоединяйся и получи приветственный бонус прямо сейчас.
-      </p>
-      <div style="display: flex; gap: var(--space-sm); justify-content: center; flex-wrap: wrap;">
-        <button class="btn btn-gold">Играть сейчас</button>
-        <button class="btn btn-outline">Узнать больше</button>
-      </div>
-    </section>
-
-    <!-- ==========================================================
-         БЛОК СТАТИСТИКИ (glass-card)
-         ========================================================== -->
-    <section style="padding: 0 var(--space-lg) var(--space-lg);">
-      <div class="glass-card glass-card--strong animate-fade-in-up"
-           style="display: flex; flex-wrap: wrap; justify-content: space-around; gap: var(--space-md); text-align: center;">
-        <div>
-          <h2 class="text-gradient-gold" style="font-size: 2rem;">$2.4M</h2>
-          <p style="color: var(--color-text-muted); font-size: 0.85rem;">Выплачено за месяц</p>
+    <!-- Неоновые полосы -->
+    <div class="neon-strip-left"></div>
+    <div class="neon-strip-right"></div>
+    <!-- Шапка с балансом -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">💎 CASINO</div>
+            <div class="balance">
+                <span class="balance-label">Баланс:</span>
+                <span class="balance-amount" id="balance-amount">0 ₽</span>
+            </div>
         </div>
-        <div>
-          <h2 class="text-gradient-gold" style="font-size: 2rem;">500+</h2>
-          <p style="color: var(--color-text-muted); font-size: 0.85rem;">Игр в каталоге</p>
+    </header>
+
+    <!-- Главное меню -->
+    <div id="main-menu" class="main-menu">
+        <h1 class="menu-title">Выберите игру</h1>
+        <div class="games-menu">
+            <button class="game-btn" id="btn-mines">
+                <div class="game-icon">💣</div>
+                <div class="game-name">Минное поле</div>
+            </button>
+            <button class="game-btn" id="btn-roulette">
+                <div class="game-icon">🎡</div>
+                <div class="game-name">Рулетка</div>
+            </button>
+            <button class="game-btn" id="btn-slots">
+                <div class="game-icon">🎰</div>
+                <div class="game-name">Слоты</div>
+            </button>
+            <button class="game-btn" id="btn-dice">
+                <div class="game-icon">🎲</div>
+                <div class="game-name">Кости</div>
+            </button>
+            <button class="game-btn" id="btn-coin">
+                <div class="game-icon">🪙</div>
+                <div class="game-name">Монетка</div>
+            </button>
         </div>
-        <div>
-          <h2 class="text-gradient-gold" style="font-size: 2rem;">24/7</h2>
-          <p style="color: var(--color-text-muted); font-size: 0.85rem;">Поддержка игроков</p>
+    </div>
+
+    <!-- Экран игры -->
+    <div id="game-screen" class="game-screen" style="display: none;">
+        <div class="game-header">
+            <button class="btn-back" id="btn-back">← Назад</button>
+            <h2 class="game-title" id="game-screen-title">Игра</h2>
         </div>
-        <div>
-          <h2 class="text-gradient-gold" style="font-size: 2rem;">100%</h2>
-          <p style="color: var(--color-text-muted); font-size: 0.85rem;">Бонус на первый депозит</p>
-        </div>
-      </div>
-    </section>
+        <div class="game-content" id="game-content"></div>
+    </div>
 
-    <!-- ==========================================================
-         КАТАЛОГ ИГР (game-card)
-         ========================================================== -->
-    <section id="games" style="padding: 0 var(--space-lg) var(--space-lg);">
-      <h2 class="font-display" style="margin-bottom: var(--space-md); font-size: 1.8rem;">
-        Популярные <span class="text-gradient-gold">игры</span>
-      </h2>
-
-      <div class="stagger"
-           style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-md);">
-
-        <article class="game-card glass-card" style="padding: 0;">
-          <img src="https://placehold.co/400x520/1a0f2e/D4AF37?text=Golden+Reels" alt="Golden Reels — слот">
-          <div class="game-card__overlay">
-            <span class="game-card__title">Golden Reels</span>
-          </div>
-        </article>
-
-        <article class="game-card glass-card" style="padding: 0;">
-          <img src="https://placehold.co/400x520/1a0f2e/D4AF37?text=Royal+Blackjack" alt="Royal Blackjack">
-          <div class="game-card__overlay">
-            <span class="game-card__title">Royal Blackjack</span>
-          </div>
-        </article>
-
-        <article class="game-card glass-card" style="padding: 0;">
-          <img src="https://placehold.co/400x520/1a0f2e/D4AF37?text=Diamond+Roulette" alt="Diamond Roulette">
-          <div class="game-card__overlay">
-            <span class="game-card__title">Diamond Roulette</span>
-          </div>
-        </article>
-
-        <article class="game-card glass-card" style="padding: 0;">
-          <img src="https://placehold.co/400x520/1a0f2e/D4AF37?text=Mystic+Jackpot" alt="Mystic Jackpot">
-          <div class="game-card__overlay">
-            <span class="game-card__title">Mystic Jackpot</span>
-          </div>
-        </article>
-
-        <article class="game-card glass-card" style="padding: 0;">
-          <img src="https://placehold.co/400x520/1a0f2e/D4AF37?text=Poker+Elite" alt="Poker Elite">
-          <div class="game-card__overlay">
-            <span class="game-card__title">Poker Elite</span>
-          </div>
-        </article>
-
-        <article class="game-card glass-card" style="padding: 0;">
-          <img src="https://placehold.co/400x520/1a0f2e/D4AF37?text=Baccarat+VIP" alt="Baccarat VIP">
-          <div class="game-card__overlay">
-            <span class="game-card__title">Baccarat VIP</span>
-          </div>
-        </article>
-
-      </div>
-    </section>
-
-    <!-- ==========================================================
-         VIP / БОНУСЫ (neon-border)
-         ========================================================== -->
-    <section id="vip" style="padding: 0 var(--space-lg) var(--space-xl);">
-      <div class="glass-card neon-border animate-fade-in-up"
-           style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-md);">
-        <div>
-          <h2 class="font-display text-gradient-gold" style="font-size: 1.6rem; margin-bottom: var(--space-xs);">
-            VIP-клуб Golden Vegas
-          </h2>
-          <p style="color: var(--color-text-secondary); max-width: 480px;">
-            Персональный менеджер, кэшбэк до 20% и эксклюзивные турниры
-            для игроков высокого уровня.
-          </p>
-        </div>
-        <button class="btn btn-gold">Стать VIP</button>
-      </div>
-    </section>
-  </main>
-
-  <!-- ==========================================================
-       ФУТЕР
-       ========================================================== -->
-  <footer id="support"
-          style="padding: var(--space-md) var(--space-lg); text-align: center;
-                 border-top: 1px solid var(--glass-border); color: var(--color-text-muted); font-size: 0.85rem;">
-    <p>18+ Играйте ответственно. &copy; 2026 Golden Vegas. Все права защищены.</p>
-  </footer>
-
+    <script src="casino.js"></script>
 </body>
 </html>
