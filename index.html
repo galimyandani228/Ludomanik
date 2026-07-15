@@ -1,101 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Казино Mini App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: white;
-            padding: 20px;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            max-width: 400px;
-            width: 100%;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-        }
-        h1 {
-            text-align: center;
-            color: #ffd700;
-            margin-bottom: 30px;
-        }
-        .game-btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .game-btn:hover {
-            transform: scale(1.05);
-        }
-        .btn-mines { background: #ff6b6b; color: white; }
-        .btn-roulette { background: #4ecdc4; color: white; }
-        .btn-slots { background: #45b7d1; color: white; }
-        .btn-dice { background: #96ceb4; color: white; }
-        .btn-coin { background: #ffeaa7; color: #2d3436; }
-        .balance {
-            text-align: center;
-            font-size: 24px;
-            padding: 15px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ludomaniks Casino</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🎰 Виртуальное Казино</h1>
-        <div class="balance">
-            💰 Баланс: <span id="balance">0</span>
+    <div id="app">
+        <!-- Шапка -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">♠</span>
+                <span class="logo-text">LUDOMANIKS</span>
+            </div>
+            <div class="balance-container">
+                <span class="balance-label">💰 БАЛАНС</span>
+                <span class="balance-amount" id="balance">0</span>
+            </div>
+        </header>
+
+        <!-- Главное меню -->
+        <div id="mainMenu">
+            <div class="menu-grid">
+                <button class="game-btn" data-game="mines">
+                    <span class="game-icon">💣</span>
+                    <span class="game-name">Минное поле</span>
+                    <span class="game-desc">x2.5</span>
+                </button>
+                <button class="game-btn" data-game="roulette">
+                    <span class="game-icon">🎡</span>
+                    <span class="game-name">Рулетка</span>
+                    <span class="game-desc">x14</span>
+                </button>
+                <button class="game-btn" data-game="slots">
+                    <span class="game-icon">🎰</span>
+                    <span class="game-name">Слоты</span>
+                    <span class="game-desc">x50</span>
+                </button>
+                <button class="game-btn" data-game="dice">
+                    <span class="game-icon">🎲</span>
+                    <span class="game-name">Кости</span>
+                    <span class="game-desc">x5</span>
+                </button>
+                <button class="game-btn" data-game="coin">
+                    <span class="game-icon">🪙</span>
+                    <span class="game-name">Монетка</span>
+                    <span class="game-desc">x2</span>
+                </button>
+            </div>
         </div>
-        
-        <button class="game-btn btn-mines" onclick="sendGame('mines')">💣 Минное поле</button>
-        <button class="game-btn btn-roulette" onclick="sendGame('roulette')">🎡 Рулетка</button>
-        <button class="game-btn btn-slots" onclick="sendGame('slots')">🎰 Слоты</button>
-        <button class="game-btn btn-dice" onclick="sendGame('dice')">🎲 Кости</button>
-        <button class="game-btn btn-coin" onclick="sendGame('coin')">🪙 Монетка</button>
+
+        <!-- Игровое поле -->
+        <div id="gameScreen" style="display:none;">
+            <div class="game-header">
+                <button class="back-btn" id="backBtn">← НАЗАД</button>
+                <span class="game-title" id="gameTitle">Игра</span>
+            </div>
+            <div id="gameContent" class="game-content">
+                <!-- Сюда динамически загружается игра -->
+            </div>
+        </div>
+
+        <!-- Футер -->
+        <footer class="footer">
+            <span>v1.0</span>
+            <span>•</span>
+            <span>Виртуальное казино</span>
+        </footer>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
-        // Получаем данные пользователя из Telegram
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        
-        // Отправляем событие в бот при нажатии на кнопку
-        function sendGame(game) {
-            tg.sendData(JSON.stringify({
-                action: 'play',
-                game: game
-            }));
-            tg.close(); // Закрывает мини-приложение
-        }
-        
-        // Пример получения данных от бота
-        // В реальном боте вы можете получать баланс и другие данные
-        document.addEventListener('DOMContentLoaded', function() {
-            // Здесь можно запросить баланс у бота
-            tg.sendData(JSON.stringify({
-                action: 'get_balance'
-            }));
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
