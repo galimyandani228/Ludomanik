@@ -3,8 +3,8 @@
 // ============================================================
 
 // ===== КОНФИГ =====
-// ⚠️ ЗАМЕНИ ЭТУ СТРОКУ НА СВОЙ IP, ЕСЛИ БОТ НЕ НА ТВОЁМ КОМПЬЮТЕРЕ!
-const API_URL = 'http://localhost:5000';
+// ⚠️ ЕСЛИ БОТ НА ДРУГОМ КОМПЬЮТЕРЕ — ЗАМЕНИ НА ЕГО IP
+const API_URL = 'http://172.16.5.55:5000';
 
 // ===== TELEGRAM WEB APP =====
 const tg = window.Telegram?.WebApp;
@@ -28,12 +28,15 @@ const state = {
 // ===== УТИЛИТЫ =====
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// ===== HTTP ЗАПРОСЫ К БОТУ (Flask API) =====
+// ===== HTTP ЗАПРОСЫ К БОТУ =====
 
 async function requestBalance() {
     try {
+        console.log('📥 Запрос баланса для user_id:', state.userId);
         const res = await fetch(`${API_URL}/api/balance?user_id=${state.userId}`);
         const data = await res.json();
+        console.log('📩 Ответ от бота:', data);
+        
         if (data.balance !== undefined) {
             updateBalance(data.balance);
             state.isBalanceLoaded = true;
@@ -41,6 +44,11 @@ async function requestBalance() {
         return data;
     } catch (e) {
         console.error('❌ Ошибка получения баланса:', e);
+        // Если ошибка — показываем начальный баланс
+        if (!state.isBalanceLoaded) {
+            updateBalance(1000);
+            state.isBalanceLoaded = true;
+        }
     }
 }
 
@@ -56,6 +64,8 @@ async function sendGameResult(action, amount) {
             })
         });
         const data = await res.json();
+        console.log('📩 Ответ после игры:', data);
+        
         if (data.balance !== undefined) {
             updateBalance(data.balance);
         }
@@ -83,90 +93,29 @@ function updateBalance(newBalance) {
     console.log('💰 Баланс обновлен:', state.balance);
 }
 
-// ===== ЭФФЕКТ РЯБИ =====
-function createRipple(event) {
-    const button = event.currentTarget;
-    const ripple = document.createElement('span');
-    ripple.classList.add('ripple');
-
-    const rect = button.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = event.clientX - rect.left - size / 2;
-    const y = event.clientY - rect.top - size / 2;
-
-    ripple.style.width = ripple.style.height = size + 'px';
-    ripple.style.left = x + 'px';
-    ripple.style.top = y + 'px';
-
-    button.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
-}
-
-// ===== ВИБРАЦИЯ =====
-function hapticFeedback(type = 'light') {
-    if (tg?.HapticFeedback) {
-        switch(type) {
-            case 'light': tg.HapticFeedback.impactOccurred('light'); break;
-            case 'medium': tg.HapticFeedback.impactOccurred('medium'); break;
-            case 'heavy': tg.HapticFeedback.impactOccurred('heavy'); break;
-            case 'success': tg.HapticFeedback.notificationOccurred('success'); break;
-            case 'error': tg.HapticFeedback.notificationOccurred('error'); break;
-        }
-    }
-}
-
-// ===== УВЕДОМЛЕНИЯ =====
-function showMessage(text, type = 'info') {
-    const messageEl = document.createElement('div');
-    messageEl.className = `game-message ${type}`;
-    messageEl.textContent = text;
-    document.body.appendChild(messageEl);
-
-    if (type === 'success') hapticFeedback('success');
-    else if (type === 'error') hapticFeedback('error');
-    else hapticFeedback('light');
-
-    setTimeout(() => {
-        messageEl.style.opacity = '0';
-        setTimeout(() => messageEl.remove(), 300);
-    }, 2000);
-}
-
-// ============================================================
-// ИНИЦИАЛИЗАЦИЯ
-// ============================================================
-
+// ===== ИНИЦИАЛИЗАЦИЯ =====
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Инициализация приложения...');
     console.log('👤 User ID:', state.userId);
     
-    const savedBalance = localStorage.getItem('balance');
-    if (savedBalance) {
-        state.balance = parseInt(savedBalance);
-        updateBalance(state.balance);
-    }
+    // Сначала показываем заглушку
+    updateBalance(0);
+    
+    // Запрашиваем баланс
+    requestBalance();
 
+    // Инициализация меню
     initMainMenu();
     addSyncButton();
 
-    requestBalance();
-
+    // Если баланс не пришел через 3 секунды — ставим 1000
     setTimeout(() => {
         if (!state.isBalanceLoaded) {
             console.log('⏰ Таймаут, устанавливаем начальный баланс');
-            const startBalance = parseInt(localStorage.getItem('balance')) || 1000;
-            updateBalance(startBalance);
+            updateBalance(1000);
             state.isBalanceLoaded = true;
         }
     }, 3000);
-
-    setTimeout(() => {
-        document.querySelectorAll('button').forEach(btn => {
-            btn.style.position = 'relative';
-            btn.style.overflow = 'hidden';
-            btn.addEventListener('click', createRipple);
-        });
-    }, 100);
 });
 
 // ============================================================
@@ -174,9 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 
 function initMainMenu() {
-    const mainMenu = document.getElementById('main-menu');
-    const gameScreen = document.getElementById('game-screen');
-
     document.getElementById('btn-mines')?.addEventListener('click', () => openGame('mines', '💣 Минное поле'));
     document.getElementById('btn-roulette')?.addEventListener('click', () => openGame('roulette', '🎡 Рулетка'));
     document.getElementById('btn-slots')?.addEventListener('click', () => openGame('slots', '🎰 Слоты'));
@@ -184,8 +130,8 @@ function initMainMenu() {
     document.getElementById('btn-coin')?.addEventListener('click', () => openGame('coin', '🪙 Монетка'));
 
     document.getElementById('btn-back')?.addEventListener('click', () => {
-        mainMenu.style.display = 'block';
-        gameScreen.style.display = 'none';
+        document.getElementById('main-menu').style.display = 'block';
+        document.getElementById('game-screen').style.display = 'none';
         state.currentGame = null;
         requestBalance();
     });
@@ -195,15 +141,11 @@ function openGame(gameName, gameTitle) {
     state.currentGame = gameName;
     hapticFeedback('light');
 
-    const mainMenu = document.getElementById('main-menu');
-    const gameScreen = document.getElementById('game-screen');
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+    document.getElementById('game-screen-title').textContent = gameTitle;
+
     const gameContent = document.getElementById('game-content');
-    const gameScreenTitle = document.getElementById('game-screen-title');
-
-    mainMenu.style.display = 'none';
-    gameScreen.style.display = 'block';
-    gameScreenTitle.textContent = gameTitle;
-
     switch(gameName) {
         case 'mines': renderMinesGame(gameContent); break;
         case 'roulette': renderRouletteGame(gameContent); break;
@@ -211,24 +153,11 @@ function openGame(gameName, gameTitle) {
         case 'dice': renderDiceGame(gameContent); break;
         case 'coin': renderCoinGame(gameContent); break;
     }
-
-    setTimeout(() => {
-        gameContent.querySelectorAll('button').forEach(btn => {
-            btn.style.position = 'relative';
-            btn.style.overflow = 'hidden';
-            if (!btn.hasAttribute('data-ripple')) {
-                btn.addEventListener('click', createRipple);
-                btn.setAttribute('data-ripple', 'true');
-            }
-        });
-    }, 100);
 }
 
-// ============================================================
-// КОМПОНЕНТ СТАВОК
-// ============================================================
+// ===== КОМПОНЕНТ СТАВОК =====
 
-function createBetSelector(onBetChange) {
+function createBetSelector() {
     const betAmounts = [10, 25, 50, 100, 250, 500, 1000, 5000];
 
     let html = '<div class="bet-selector">';
@@ -241,10 +170,10 @@ function createBetSelector(onBetChange) {
 
     html += '</div>';
     html += '<div class="custom-bet">';
-    html += '<input type="number" id="custom-bet-input" placeholder="Своя ставка" min="1" max="999999">';
+    html += `<input type="number" id="custom-bet-input" placeholder="Своя ставка" min="1" max="${state.balance}">`;
     html += '<button id="custom-bet-confirm">✅</button>';
     html += '</div>';
-    html += '<div class="current-bet">Ставка: <span class="current-bet-display">' + state.bet + ' ₽</span></div>';
+    html += `<div class="current-bet">Ставка: <span class="current-bet-display">${state.bet} ₽</span></div>`;
     html += '</div>';
 
     return html;
@@ -287,9 +216,37 @@ function initBetSelector(container, onBetChange) {
     });
 }
 
-// ============================================================
-// КНОПКА СИНХРОНИЗАЦИИ
-// ============================================================
+// ===== УВЕДОМЛЕНИЯ =====
+
+function showMessage(text, type = 'info') {
+    const messageEl = document.createElement('div');
+    messageEl.className = `game-message ${type}`;
+    messageEl.textContent = text;
+    document.body.appendChild(messageEl);
+
+    if (type === 'success') hapticFeedback('success');
+    else if (type === 'error') hapticFeedback('error');
+    else hapticFeedback('light');
+
+    setTimeout(() => {
+        messageEl.style.opacity = '0';
+        setTimeout(() => messageEl.remove(), 300);
+    }, 2000);
+}
+
+function hapticFeedback(type = 'light') {
+    if (tg?.HapticFeedback) {
+        switch(type) {
+            case 'light': tg.HapticFeedback.impactOccurred('light'); break;
+            case 'medium': tg.HapticFeedback.impactOccurred('medium'); break;
+            case 'heavy': tg.HapticFeedback.impactOccurred('heavy'); break;
+            case 'success': tg.HapticFeedback.notificationOccurred('success'); break;
+            case 'error': tg.HapticFeedback.notificationOccurred('error'); break;
+        }
+    }
+}
+
+// ===== КНОПКА СИНХРОНИЗАЦИИ =====
 
 function forceSyncBalance() {
     console.log('🔄 Принудительная синхронизация...');
@@ -783,4 +740,3 @@ function renderCoinGame(container) {
 
 console.log('🎰 LUDOMANIKS CASINO загружен!');
 console.log('👤 User ID:', state.userId);
-console.log('💰 Баланс:', state.balance);
