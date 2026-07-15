@@ -513,7 +513,7 @@ body::before {
   .section-title {
     font-size: 2rem;
   }
-}
+} /* <-- ЭТА СКОБКА БЫЛА ПРОПУЩЕНА! */
 
 /* === АНИМАЦИИ ПРИ ЗАГРУЗКЕ === */
 @keyframes fadeInUp {
